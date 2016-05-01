@@ -19,6 +19,4 @@ $vars = [
 
 $n = new Nano\Engine();
 $n->setPath(__DIR__);
-echo $n->render('base.html.php', $vars);
-echo $n->render('hello.html.php', $vars);
 echo $n->render('hello-again.html.php', $vars);
