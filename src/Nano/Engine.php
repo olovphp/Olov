@@ -132,8 +132,19 @@ class Engine {
      *
      * @return void
      */
-    public function __construct() 
+    public function __construct($base_path = "") 
     {
+        if (!empty($base_path) && !file_exists($base_path)) {
+
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Invalid argument (1): valid folder path required. ' . 
+                    'Please check path - "%s"', $base_path
+                )
+            );
+        }
+
+        $this->base_path = is_string($base_path) ? $base_path : "";
 
         /* Base Filter Functions */
 

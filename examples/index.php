@@ -15,6 +15,6 @@ $vars = [
     ]
 ];
 
-$n = new Nano\Engine();
-$n->setPath(__DIR__);
+$n = new Nano\Engine(__DIR__);
+
 echo $n->render('hello-again.html.php', $vars);

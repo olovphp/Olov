@@ -13,12 +13,11 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
         $this->vars = [
             'page' => [
                 'title' => 'Welcome to Nano!', 
-                'body' => 'Nano is a micro template engine for PHP.'
+                'body' => 'Nano is a micro template <b>engine</b> for PHP.'
             ]
         ];
 
-        $this->engine = (new Nano\Engine())
-            ->setPath(__DIR__.'/templates');
+        $this->engine = new Nano\Engine(__DIR__.'/templates');
         
     }
 
@@ -39,7 +38,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
             ->setVar($name, $value)
             ->getVar($name);
 
-        $this->assertEquals($result, $value);
+        $this->assertEquals($value, $result);
     }
 
     /**
@@ -58,7 +57,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
             ->setVars($this->vars)
             ->__invoke($query);
 
-        $this->assertEquals($result, $expected);
+        $this->assertEquals($expected, $result);
     }
 
     /**
@@ -71,7 +70,6 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
      *      and override the parent +header block.
      *
      * @covers ::render
-     * @outputBuffering enabled
      * @return void
      */
     public function test__canRenderTemplateWithBaseTemplate()
@@ -79,7 +77,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
         $output = $this->engine->render('b.html.php', $this->vars);
         $expected = "TemplateB:HeaderTemplateA:ContentOriginalFooter";
 
-        $output = $this->strip($output);
+        $output = $this->strip($output); // Remove white space characters from output.
 
         $this->assertSame($expected, $output);
     }
@@ -87,16 +85,29 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
     /**
      * queryProvider
      *
-     * @return void
+     * @return array
      */
     public function queryProvider()
     {
         return [
             ["page.title", "Welcome to Nano!"], 
-            ["page.body", "Nano is a micro template engine for PHP."]
+            ["page.title|less:50", true], 
+            ["page.title|less:10", false], 
+            ["page.title|more:10", true], 
+            ["page.title|more:100", false], 
+            ["page.title|length", 16], 
+            ["page.body", "Nano is a micro template &lt;b&gt;engine&lt;/b&gt; for PHP."],
+            ["page.body*", "Nano is a micro template <b>engine</b> for PHP."], 
+            ["page.body|esc*", "Nano is a micro template &lt;b&gt;engine&lt;/b&gt; for PHP."],
         ];
     }
 
+    /**
+     * strip
+     *
+     * @param string $str
+     * @return string
+     */
     private function strip($str) 
     {
         return preg_replace('/\s\s*/', '', $str);
