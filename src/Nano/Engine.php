@@ -912,8 +912,8 @@ class Engine {
          */
         $loader = function () use ($__file__, $__engine__) {
             ob_start();
-            include_once(__DIR__."/__top__.php");
-            include($__file__);
+            require_once(__DIR__."/__top__.php");
+            require($__file__);
             return ob_get_clean();
         };
 
@@ -956,6 +956,15 @@ class Engine {
             // if current template has parent do this all over again
             return $this->render($template, $vars); 
         } else {
+
+            // Reset instance properties
+            $this->child = null;
+            $this->parents = [];
+            $this->vars = [];
+            $this->name = null;
+            $this->filename = null;
+
+            // Return final output
             return $output;
         }
 
