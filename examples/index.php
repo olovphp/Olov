@@ -21,4 +21,4 @@ $vars = [
 
 $n = new Nano\Engine();
 $n->setPath(ROOT_PATH);
-echo $n->render('hello-again.html.php', $vars);
+echo $n->render('c.html.php', $vars);

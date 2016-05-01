@@ -18,7 +18,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
         ];
 
         $this->engine = (new Nano\Engine())
-            ->setPath(__DIR__.'/../examples');
+            ->setPath(__DIR__.'/templates');
         
     }
 
@@ -43,24 +43,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * test__render
-     *
-     * @covers ::render
-     * @dataProvider renderProvider
-     *
-     * @param string $template
-     * @param array $vars
-     * @return void
-     */
-    public function test__render($template) 
-    {
-        $output = $this->engine->render($template, $this->vars);
-        $this->assertTrue(is_string($output) && !empty($output));
-
-    }
-
-    /**
-     * test__invoke
+     * test__engineInstanceCanBeInvoked
      *
      * @covers ::__invoke
      * @dataProvider queryProvider
@@ -69,13 +52,63 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
      * @access public
      * @return void
      */
-    public function test__invoke($query, $expected)
+    public function test__engineInstanceCanBeInvoked($query, $expected)
     {
         $result = $this->engine
             ->setVars($this->vars)
             ->__invoke($query);
 
         $this->assertEquals($result, $expected);
+    }
+
+    /**
+     * test__canRenderTemplateWithPartials
+     * 
+     * We will include ":header.html.php" and ":footer.html.php" 
+     * in "a.html.php".
+     *
+     * @covers ::render
+     * @return void
+     */
+    public function test__canRenderTemplateWithPartials()
+    {
+        $output = $this->engine->render('a.html.php', $this->vars);
+        $expected = 
+<<< END1
+Original Header
+
+Template A: Content
+
+Original Footer
+END1;
+
+        $this->assertEquals(trim($expected), trim($output));
+    }
+
+    /**
+     * test__canRenderTemplateWithBaseTemplate
+     * 
+     * We will extend template "::a.html.php" in "b.html.php" 
+     * and override the parent +header block.
+     *
+     * @covers ::render
+     * @return void
+     */
+    public function test__canRenderTemplateWithBaseTemplate()
+    {
+        $output = $this->engine->render('b.html.php', $this->vars);
+        $expected = 
+<<< END2
+Template B: Header
+
+Template A: Content
+
+Original Footer
+END2;
+
+var_dump($output);
+
+        $this->assertEquals(trim($expected), trim($output));
     }
 
     /**
@@ -88,20 +121,6 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
         return [
             ["page.title", "Welcome to Nano!"], 
             ["page.body", "Nano is a micro template engine for PHP."]
-        ];
-    }
-
-    /**
-     * renderProvider
-     *
-     * @return void
-     */
-    public function renderProvider()
-    {
-        return [
-            ["base.html.php"], 
-            ["hello.html.php"], 
-            ["hello-again.html.php"]
         ];
     }
 

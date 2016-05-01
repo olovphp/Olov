@@ -21,13 +21,12 @@ class Engine {
     const EXTEND = 1;
     const RENDER = 2;
 
-
     /**
-     * instance
+     * debug
      *
-     * @var mixed
+     * @var bool
      */
-    private static $instance;
+    private $debug = true;
 
     /**
      * base_path
@@ -373,7 +372,6 @@ class Engine {
         // add base template to stack
         $this->parents_stack[] = $data['name'];
 
-        return '';
     }
 
     /**
@@ -417,8 +415,13 @@ class Engine {
         $name = $data['name'];
 
         if ($this->block_is_open === false || $this->block_is_open !== $name) {
+            $expected = $this->block_is_open ? $this->block_is_open : "none";
+
             throw new RuntimeException(
-                sprintf('This block "%s" is already closed or wasn\'t opened; typo?', $name)
+                sprintf(
+                    'The "+%s" block is already closed or wasn\'t opened. ' . 
+                    'Expected block ending: "-%s".', $name, $expected
+                )
             );
         }
 
@@ -934,9 +937,17 @@ class Engine {
      */
     public function render($template, array $vars)
     {
+        if ($this->debug) {
+            assert(!empty($this->base_path), "::base_path is not set.");
+        }
+
         $this->name = $template;
         $this->vars = $vars;
         $output = $this->compile($template, self::RENDER);
+
+        if ($this->debug) {
+            assert(!empty($output), "Blank output returned from ::compile method.");
+        }
 
         if ($this->hasParent()) {
             $this->child = $template; // It'S A BOY!! 
