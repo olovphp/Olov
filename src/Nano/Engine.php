@@ -17,7 +17,7 @@ use Closure;
  */
 class Engine {
 
-    const IMPORT = 0;
+    const PARTIAL = 0;
     const EXTEND = 1;
     const RENDER = 2;
 
@@ -323,16 +323,16 @@ class Engine {
     }
 
     /**
-     * _handle__import
+     * _handle__partial
      *
      * <?php o(':header.html.php') ?>
      *
      * @param array $data
      * @return void
      */
-    protected function _handle__import(array $data) 
+    protected function _handle__partial(array $data) 
     {
-        echo $this->compile($data['file'], self::IMPORT);
+        echo $this->compile($data['file'], self::PARTIAL);
 
     }
 
@@ -867,7 +867,7 @@ class Engine {
         case '+': return ['type'=>'block_start', 'name'=>substr($q,1)];
         case '-': return ['type'=>'block_end', 'name'=>substr($q,1)];
         case '|': return ['type'=>'fn', 'name'=>substr($q,1)];
-        case ':': return ['type'=>'import', 'file'=>substr($q,1)];
+        case ':': return ['type'=>'partial', 'file'=>substr($q,1)];
         }
 
         throw new \RuntimeException(
@@ -895,7 +895,7 @@ class Engine {
             }
         }
 
-        // set default path for imports and inheritence.
+        // set default path for partials and inheritence.
         if (empty($this->base_path)) {
             $this->base_path = pathinfo($__file__, PATHINFO_DIRNAME);
         }
@@ -987,7 +987,7 @@ class Engine {
             throw new \RuntimeException(sprintf('Can\'t find template folder %s. Please check path.', $path));
         }
 
-        // set default path for imports and inheritence.
+        // set default path for partials and inheritence.
         $this->base_path = is_dir($path) ? $path : pathinfo($path, PATHINFO_DIRNAME);
 
         return $this;
