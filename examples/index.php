@@ -2,8 +2,6 @@
 
 require_once __DIR__.'/../src/Nano/Engine.php';
 
-use Cataleya\Apps\Nano;
-
 $vars = [
     'page' => [
         'title' => 'Welcome to Nano', 
