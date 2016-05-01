@@ -62,32 +62,13 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * test__canRenderTemplateWithPartials
-     * 
-     * We will include ":header.html.php" and ":footer.html.php" 
-     * in "a.html.php".
-     *
-     * @covers ::render
-     * @outputBuffering enabled
-     * @return void
-     */
-    public function test__canRenderTemplateWithPartials()
-    {
-        //$output = $this->engine->render('a.html.php', $this->vars);
-        $expected = "OriginalHeaderTemplateA:ContentOriginalFooter";
-
-        //$output = $this->strip($output);
-
-        //var_dump([$output, $expected]);
-
-        $this->assertEquals(1,1); // trim($expected), trim($output));
-    }
-
-    /**
      * test__canRenderTemplateWithBaseTemplate
      * 
-     * We will extend template "::a.html.php" in "b.html.php" 
-     * and override the parent +header block.
+     * 1.   We will include ":header.html.php" and ":footer.html.php" 
+     *      in "a.html.php".
+     *
+     * 2.   We will extend template "::a.html.php" in "b.html.php" 
+     *      and override the parent +header block.
      *
      * @covers ::render
      * @outputBuffering enabled
@@ -100,9 +81,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
 
         $output = $this->strip($output);
 
-        var_dump([$output, $expected]);
-
-        $this->assertEquals($expected, $output);
+        $this->assertSame($expected, $output);
     }
 
     /**

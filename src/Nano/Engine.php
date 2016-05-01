@@ -26,7 +26,7 @@ class Engine {
      *
      * @var bool
      */
-    private $debug = true;
+    private $debug = false;
 
     /**
      * base_path
@@ -937,9 +937,6 @@ class Engine {
      */
     public function render($template, array $vars)
     {
-        if ($this->debug) {
-            assert(!empty($this->base_path), "::base_path is not set.");
-        }
 
         $this->name = $template;
         $this->vars = $vars;
@@ -957,12 +954,8 @@ class Engine {
             return $this->render($template, $vars); 
         } else {
 
-            // Reset instance properties
+            // Reset ::child property
             $this->child = null;
-            $this->parents = [];
-            $this->vars = [];
-            $this->name = null;
-            $this->filename = null;
 
             // Return final output
             return $output;
