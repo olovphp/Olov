@@ -1,4 +1,4 @@
-<?php o('::a.html.php'); ?>
+<?php o('::b.html.php'); ?>
 
 <?php o('+content'); ?>
 Template C: Content

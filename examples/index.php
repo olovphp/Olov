@@ -1,8 +1,6 @@
 <?php
 
-define ('ROOT_PATH', getcwd());
-
-require_once ROOT_PATH.'/../src/Nano/Engine.php';
+require_once __DIR__.'/../src/Nano/Engine.php';
 
 use Cataleya\Apps\Nano;
 
@@ -20,5 +18,5 @@ $vars = [
 ];
 
 $n = new Nano\Engine();
-$n->setPath(ROOT_PATH);
-echo $n->render('c.html.php', $vars);
+$n->setPath(__DIR__);
+echo $n->render('hello-again.html.php', $vars);
