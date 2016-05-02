@@ -250,9 +250,27 @@ class Engine {
          */
         $this->filters['each'] = function ($arr = [], $tag = 'li') {
             static $tags = [
-                'a'=>1, 'b'=>1, 'u'=>1, 'i'=>1, 
-                'strong'=>1, 'li'=>1, 'div'=>1, 'p'=>1, 
-                'span'=>1, 'td'=>1, 'tr'=>1
+                'a'=>1, 
+                'b'=>1, 
+                'u'=>1, 
+                'i'=>1, 
+                'strong'=>1, 
+                'li'=>1, 
+                'div'=>1, 
+                'p'=>1, 
+                'span'=>1, 
+                'td'=>1, 
+                'tr'=>1, 
+                'h1'=>1, 
+                'h2'=>1, 
+                'h3'=>1, 
+                'h4'=>1, 
+                'h5'=>1, 
+                'h6'=>1,
+                'section'=>1,
+                'img'=>0, // 0: no closing tag
+                'input'=>0 
+                
             ];
             $tg_stack = func_get_args(); array_shift($tg_stack);
             if (empty($tg_stack)) $tg_stack = [$tag];
@@ -275,18 +293,21 @@ class Engine {
 
             }
 
-            $result = array_reduce((array)$arr, function ($str, $v) use ($tg_stack) { 
+            $result = array_reduce((array)$arr, function ($html, $v) use ($tg_stack, $tags) { 
 
-                    switch (gettype($v)) {
-                    case 'array':
-                        // parse property maps (ex -- "a:href" => "http://link.com")
+                    $tgo = $tgc = "";
+                    if (is_array($v)) {
+
+                        // :array: parse property maps (ex -- "a:href" => "http://link.com")
                         // -----------------------------------------------------------
-                        // The <tag>text</tag> we will wrap with our tags is the one that isn't mapped to a
-                        // property. If we find more than one of such, we will overwrite it 
-                        // with each new occurance. If none is found we will use "undefined" 
-                        // as a visual notice to whomever it may concern!
+                        // The <tag>text</tag> we will wrap with our tags is the one that 
+                        // isn't mapped to a property. If we find more than one of such, 
+                        // we will overwrite it with each new occurance. If none is found 
+                        // we will use an empty string in case we are rendering a self-closing 
+                        // tag (ex: <img>, <input>...)
                         $pattern = '/^('.implode('|', $tg_stack).'):(.*)$/';
-                        $props = []; $text = "undefined";
+                        $props = []; 
+                        $text = ""; // empty in case we are just trying to render an <img>
                         foreach ($v as $pk=>$pv) {
 
                             if (preg_match($pattern, (string)$pk, $_)) {
@@ -296,28 +317,33 @@ class Engine {
                             }
                         }
 
-                        $tgo = $tgc = "";
                         foreach ($tg_stack as $tg) {
-                            $plist = isset($props[$tg]) ? ' '.implode(' ', $props[$tg]) : '';
-                            $tgo = "<$tg$plist>$tgo";
-                            $tgc = "$tgc</$tg>";
+                            $pstr = isset($props[$tg]) ? ' '.implode(' ', $props[$tg]) : '';
+
+                            // If tag name is registered in the $tags array ref 
+                            // with a value of 1, we close the tag otherwise we don't. 
+                            $tgo = 1===$tags[$tg] ? "<$tg$pstr>$tgo" : "<$tg$pstr />$tgo";
+                            $tgc = 1===$tags[$tg] ? "$tgc</$tg>" : $tgc;
                         }
-                        break;
-                    default:
-                        $tgo = $tgc = "";
+
+                    } else {
+                        // :scalar:
+
                         foreach ($tg_stack as $tg) {
-                            $tgo = "<$tg>$tgo";
-                            $tgc = "$tgc</$tg>";
+                            // If tag name is registered in the $tags array ref 
+                            // with a value of 1, we close the tag otherwise we don't. 
+                            $tgo = 1===$tags[$tg] ? "<$tg>$tgo" : "<$tg />$tgo";
+                            $tgc = 1===$tags[$tg] ? "$tgc</$tg>" : $tgc;
                         }
                         $text = $v;
-                        break;
 
                     }
 
                     $text = (is_string($text) || is_numeric($text)) ? (string)$text : gettype($text);
-                    return "$str$tgo" . htmlspecialchars($text, ENT_COMPAT, 'UTF-8') . "$tgc\n";
+                    return "$html$tgo" . htmlspecialchars($text, ENT_COMPAT, 'UTF-8') . "$tgc\n";
 
                 }, "");
+
             echo $result;
             return $result;
         };

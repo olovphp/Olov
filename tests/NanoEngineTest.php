@@ -47,6 +47,11 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
                     ['txt'=>'Twitter', 'a:href'=>'http://twitter.com', 'li:class'=>'item'], 
                     ['val'=>'LinkedIn', 'a:href'=>'http://linkedin.com', 'li:class'=>'item'], 
                     ['value'=>'Pinterest', 'a:href'=>'http://pinterest.com', 'li:class'=>'item'], 
+                ], 
+                'todos'=> [
+                    ['Grace Huang', 'input:type'=>'radio', 'input:name'=>'dev', 'input:value'=>'Grace Hunag'], 
+                    ['Poppy Delevigne', 'input:type'=>'radio', 'input:name'=>'dev', 'input:value'=>'Poppy Delevigne'], 
+                    ['Harley Viera-Newton', 'input:type'=>'radio', 'input:name'=>'dev', 'input:value'=>'Harley Viera-Newton']
                 ]
 
             ]
@@ -146,20 +151,49 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
     public function queryProvider()
     {
         return [
+            // 0: Expect false if variable is not set
             ["?page.author", false], 
+
+            // 1: Expect true if variable is set
             ["?page.title", true], 
+
+            // 2: Expect variable content
             ["page.title", "Welcome to Nano!"], 
+
+            // 3: Expect true if variable's content length < 50 
             ["page.title|less:50", true], 
+
+            // 4: Expect false if variable's content length is not < 10 
             ["page.title|less:10", false], 
+
+            // 5: Expect true if variable's content length > 10 
             ["page.title|more:10", true], 
+
+            // 6: Expect false if variable's content length not > 100 
             ["page.title|more:100", false], 
+
+            // 7: Expect string content length 
             ["page.title|length", 16], 
+
+            // 7: Expect array content length 
+            ["page.links|length", 7],
+
+            // 8: Expect escaped variable content
             ["page.body", "Nano is a micro template &lt;b&gt;engine&lt;/b&gt; for PHP."],
+
+            // 9: Expect raw variable content
             ["page.body*", "Nano is a micro template <b>engine</b> for PHP."], 
+
+            // 10: Expect escaped variable content (* turns it off, esc turns it back on -- zero sum)
             ["page.body|esc*", "Nano is a micro template &lt;b&gt;engine&lt;/b&gt; for PHP."],
+
+            // 11: Expect escaped array variable values
             ["page.tags", ['php','nano', 'esca&gt;pe&lt;=me', 'template', 'html']],
+
+            // 12: Expect raw array variable values
             ["page.tags*", ['php','nano', 'esca>pe<=me', 'template', 'html']],
-            ["page.tags|length", 5], 
+
+            // 13: Expect Nano to echo array content with each entry wrapped in <li>
             ["page.tags|each", array_reduce(
                 ['php', 'nano', 'esca>pe<=me', 'template', 'html'],
                 function ($str, $v) {
@@ -167,6 +201,8 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
                     return "$str<li>$v</li>\n";
                 }, "")
             ], 
+
+            // 14: Expect Nano to echo array content with each entry wrapped in <div>
             ["page.tags|each:div", array_reduce(
                 ['php', 'nano', 'esca>pe<=me', 'template', 'html'],
                 function ($str, $v) {
@@ -174,6 +210,8 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
                     return "$str<div>$v</div>\n";
                 }, "")
             ] , 
+
+            // 15: Expect Nano to echo array content with each entry wrapped in <li><a><b> --- </b></a></li>
             ["page.tags|each:b,a,li", array_reduce(
                 ['php', 'nano', 'esca>pe<=me', 'template', 'html'],
                 function ($str, $v) {
@@ -181,6 +219,9 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
                     return "$str<li><a><b>$v</b></a></li>\n";
                 }, "")
             ], 
+
+            // 16: Expect Nano to echo array content with each entry wrapped in <li><a><b> --- </b></a></li>
+            //     and handle invalid entries like objects by printing their type instead ("object").
             ["page.mixed|each:b,a,li", array_reduce(
                 ['php', 'nano', 'esca>pe<=me', ['template', 'object'], ['object'], 'object'],
                 function ($str, $v) {
@@ -194,15 +235,26 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
                     return "$str<li><a><b>$v</b></a></li>\n";
                 }, "")
             ], 
+
+            // 17: Expect Nano to echo array content with each entry wrapped in <li><a> --- </a></li>
+            //     with mapped tag properties rendered correctly.
             [
                 "page.links|each:a,li",
                 '<li><a>Who? Me?</a></li>' . "\n" .  
-                '<li class="item"><a href="http://unknown.com">undefined</a></li>' . "\n" . 
+                '<li class="item"><a href="http://unknown.com"></a></li>' . "\n" . 
                 '<li class="item"><a href="http://facebook.com">Facebook &gt;&gt;&gt;</a></li>' . "\n" . 
                 '<li class="item"><a href="http://instagram.com">Instagram</a></li>' . "\n" .  
                 '<li class="item"><a href="http://twitter.com">Twitter</a></li>' . "\n" . 
                 '<li class="item"><a href="http://linkedin.com">LinkedIn</a></li>' . "\n" .  
                 '<li class="item"><a href="http://pinterest.com">Pinterest</a></li>' . "\n"
+            ], 
+
+            // 18: Expect Nano to handle self-closing tags (ex: <li><input> --- </li>)
+            [
+                "page.todos|each:input,li",
+                '<li><input type="radio" name="dev" value="Grace Hunag" />Grace Huang</li>' . "\n" . 
+                '<li><input type="radio" name="dev" value="Poppy Delevigne" />Poppy Delevigne</li>' . "\n" . 
+                '<li><input type="radio" name="dev" value="Harley Viera-Newton" />Harley Viera-Newton</li>' . "\n"   
             ]
         ];
 
