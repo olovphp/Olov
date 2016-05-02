@@ -4,8 +4,18 @@ require_once __DIR__.'/../src/Nano/Engine.php';
 
 class NanoEngineTest extends PHPUnit_Framework_TestCase {
 
+    /**
+     * engine
+     *
+     * @var \Nano\Engine
+     */
     private $engine;
 
+    /**
+     * test_vars
+     *
+     * @var mixed[]
+     */
     private $test_vars;
 
     public function setUp() 
@@ -13,7 +23,14 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
         $this->vars = [
             'page' => [
                 'title' => 'Welcome to Nano!', 
-                'body' => 'Nano is a micro template <b>engine</b> for PHP.'
+                'body' => 'Nano is a micro template <b>engine</b> for PHP.', 
+                'tags' => [
+                    'php',
+                    'nano', 
+                    'esca>pe<=me', 
+                    'template',
+                    'html'
+                ]
             ]
         ];
 
@@ -42,7 +59,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * test__engineInstanceCanBeInvoked
+     * test__engineInstanceCanBeInvokedAndSyntaxCheck
      *
      * @covers ::__invoke
      * @dataProvider queryProvider
@@ -51,7 +68,28 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
      * @access public
      * @return void
      */
-    public function test__engineInstanceCanBeInvoked($query, $expected)
+    public function test__engineInstanceCanBeInvokedAndSyntaxCheck($query, $expected)
+    {
+        $result = $this->engine
+            ->setVars($this->vars)
+            ->__invoke($query);
+
+        $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * test__invalidArgumentExceptionIsThrowWhenArgIsBad
+     *
+     * @covers ::__invoke
+     * @dataProvider badArgQueryProvider
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Invalid HTML tag "ul". Allowed tags: li | div | p | span | td | tr
+     *
+     * @param mixed $query
+     * @access public
+     * @return void
+     */
+    public function test__invalidArgumentExceptionIsThrowWhenArgIsBad($query, $expected)
     {
         $result = $this->engine
             ->setVars($this->vars)
@@ -90,6 +128,8 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
     public function queryProvider()
     {
         return [
+            ["?page.author", false], 
+            ["?page.title", true], 
             ["page.title", "Welcome to Nano!"], 
             ["page.title|less:50", true], 
             ["page.title|less:10", false], 
@@ -99,6 +139,41 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
             ["page.body", "Nano is a micro template &lt;b&gt;engine&lt;/b&gt; for PHP."],
             ["page.body*", "Nano is a micro template <b>engine</b> for PHP."], 
             ["page.body|esc*", "Nano is a micro template &lt;b&gt;engine&lt;/b&gt; for PHP."],
+            ["page.tags", ['php','nano', 'esca&gt;pe&lt;=me', 'template', 'html']],
+            ["page.tags*", ['php','nano', 'esca>pe<=me', 'template', 'html']],
+            ["page.tags|length", 5], 
+            ["page.tags|each", array_reduce(
+                ['php', 'nano', 'esca>pe<=me', 'template', 'html'],
+                function ($str, $v) {
+                    $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
+                    return "$str<li>$v</li>\n";
+                }, "")
+            ], 
+            ["page.tags|each:div", array_reduce(
+                ['php', 'nano', 'esca>pe<=me', 'template', 'html'],
+                function ($str, $v) {
+                    $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
+                    return "$str<div>$v</div>\n";
+                }, "")
+            ] 
+        ];
+    }
+
+    /**
+     * badArgQueryProvider
+     *
+     * @return array
+     */
+    public function badArgQueryProvider()
+    {
+        return [
+            ["page.tags|each:ul", array_reduce(
+                ['php', 'nano', 'esca>pe<=me', 'template', 'html'],
+                function ($str, $v) {
+                    $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
+                    return "$str<li>$v</li>\n";
+                }, "")
+            ] 
         ];
     }
 

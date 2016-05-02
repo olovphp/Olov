@@ -5,6 +5,7 @@ namespace Nano;
 
 use Nano\Engine;
 use RuntimeException;
+use BadMethodCallException;
 use InvalidArgumentException;
 use Closure;
 
@@ -38,7 +39,7 @@ class Engine {
     /**
      * parent
      *
-     * A stack heirachical stack of parents.
+     * A heirachical stack of parents.
      * Filenames of templates that we are extending (if any.)
      *
      * @var mixed
@@ -235,6 +236,30 @@ class Engine {
                     return is_scalar($v) ? htmlspecialchars($v, ENT_COMPAT, 'UTF-8') : $v; 
                 }, (array)$var);
         };
+
+        $this->filters['each'] = function ($arr = [], $tg = 'li') {
+            static $tags = ['li'=>1, 'div'=>1, 'p'=>1, 'span'=>1, 'td'=>1, 'tr'=>1];
+
+            if (!is_string($tg)) {
+                throw new InvalidArgumentException('Argument must be a string.');
+            }
+
+            $tg = trim(strtolower($tg));
+            if (!isset($tags[$tg])) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Invalid HTML tag "%s". Allowed tags: %s', $tg, 
+                        implode(' | ', array_keys($tags))
+                    )
+                );
+            }
+
+            $result = array_reduce((array)$arr, function ($str, $v) use ($tg) { 
+                    return "$str<$tg>$v</$tg>\n";
+                }, "");
+            echo $result;
+            return $result;
+        };
     }
 
     /**
@@ -256,7 +281,7 @@ class Engine {
 
             $m = '_handle__'.$q['type'];
             if (!is_callable([$this, $m])) {
-                throw new \BadMethodCallException(
+                throw new BadMethodCallException(
                     sprintf('Unable to resolve query string "%s" with %s. Typo?', $query, $m)
                 );
             }
@@ -436,14 +461,18 @@ class Engine {
             );
         }
 
-        // Close output buffer and get block content.
+        // Get block content and close output buffer.
         $ob = ob_get_clean();
 
-        // The block __buffer__ is where we will store the block content by doing: 
-        // $this->setBlock('block_name', $content, '__buffer__'); and later this:
+        // The __buffer__ is where we will store the block content by doing: 
+        // $this->setBlock('block_name', $content, '__buffer__'); 
+        // and later this:
         // $this->getBlock('block_name', '__buffer__');
-        // What we store here is what will actually be rendered. We replace 
-        // blocks as templates are inherited and so on. Then finally we render blocks.
+        // It is like our RAM while ALL blocks (used or otherwise) are stashed away 
+        // on a hard drive of sort so that we can still refer to them later.
+        // If a +block is already in the __buffer__ and a newer version of the 
+        // same block (override) turns up, we will overwrite it (as templates are 
+        // inherited and so on.) Then finally we render blocks in __buffer__.
 
         // - Template has parent ?
         if ($this->hasParent()) { // true: collect blocks only..
@@ -452,7 +481,8 @@ class Engine {
             // - Child has current +block ? (override)
             if ($this->hasChild() && $this->hasBlock($name, $child = $this->getChild())) {
 
-                // true: use child block to override/replace current block
+                // true: use child block to override/replace current block in 
+                // the __buffer__.
                 $this->setBlock($name, $this->getBlock($name, $child), '__buffer__');
 
                 // Save this block's original content from ob in case child template calls "|parent"
@@ -462,7 +492,7 @@ class Engine {
             } else {
                 // false: use own block
 
-                // add to block buffer...
+                // add to buffer...
                 $this->setBlock($name, $ob, '__buffer__');
 
                 // Also save/attach to current template in case child template calls "|parent"
@@ -503,20 +533,19 @@ class Engine {
      */
     protected function hasVar($name) 
     {
-        $arr = $this->vars;
-        $key = $name; // To keep the $name facade.
+        $a = $this->vars;
 
-        if (empty($arr)) { return false; }
-        if (array_key_exists($key, $arr)) { return true; }
+        if (empty($a)) { return false; }
+        if (array_key_exists($name, $a)) { return true; }
         
-        foreach (explode('.', $key) as $k) 
+        foreach (explode('.', $name) as $k) 
         {
-            if (!is_array($arr) || !array_key_exists($k, $arr)) 
+            if (!is_array($a) || !array_key_exists($k, $a)) 
             {
                 return false;
             }
             
-            $arr = $arr[$k];
+            $a = $a[$k];
         }
         
         return true;
@@ -527,32 +556,31 @@ class Engine {
      *
      * Get var from mutidim array with dot key.
      *
-     * @param mixed $name   Dot key.
+     * @param string $name   Dot key.
      * @return mixed
      */
-    public function getVar($name) 
+    public function getVar($n) 
     {
-        $arr = $this->vars;
-        $key = $name; // To keep the $name facade.
+        $a = $this->vars;
 
-        if (array_key_exists($key, $arr)) { return $arr[$key]; }
+        if (array_key_exists($n, $a)) { return $a[$n]; }
         
-        foreach (explode('.', $key) as $k) 
+        foreach (explode('.', $n) as $k) 
         {
-            if (!is_array($arr) || !array_key_exists($k, $arr)) 
+            if (!is_array($a) || !array_key_exists($k, $a)) 
             {
-                $arr = null; break;
+                $a = null; break;
             }
             
-            $arr = $arr[$k];
+            $a = $a[$k];
         }
 
-        if ($arr === null) {
-            throw new \RuntimeException(
-                sprintf('Template variable %s not found.', $name)
+        if ($a === null) {
+            throw new RuntimeException(
+                sprintf('Template variable %s not found.', $n)
             );
         }
-        return $arr;
+        return $a;
 
     }
 
@@ -809,7 +837,7 @@ class Engine {
 
         $f = preg_split('/\s*:\s*/', $filter);
         if (!isset($this->filters[$f[0]])) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 sprintf('Filter "|%s" not found. Typo? Registered?', $f[0])
             );
         }
@@ -847,10 +875,11 @@ class Engine {
         if (preg_match('/^[a-zA-Z]/', $q)) {
             // assume it's a variable
             $var = explode('|', $q);
-            $var[] = 'esc'; // add escape filter
+            $name = $var[0];
+            $var[0] = 'esc'; // add escape filter
             return [
                 'type'=>'variable', 
-                'name'=>array_shift($var), 
+                'name'=>$name, 
                 'filters'=>$var
             ];
         }
@@ -870,7 +899,7 @@ class Engine {
         case ':': return ['type'=>'partial', 'file'=>substr($q,1)];
         }
 
-        throw new \RuntimeException(
+        throw new RuntimeException(
             sprintf('Unable to resolve query string "%s". Typo?', $q)
         );
     }
@@ -889,7 +918,7 @@ class Engine {
             $__file__ = (string)$this->base_path . '/' . trim($__file__, '/');
 
             if (!file_exists($__file__)) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     sprintf('Can\'t find template file %s. Please check path.', $__file__)
                 );
             }
@@ -950,7 +979,7 @@ class Engine {
     {
 
         $this->name = $template;
-        $this->vars = $vars;
+        $this->setVars($vars);
         $output = $this->compile($template, self::RENDER);
 
         if ($this->debug) {
@@ -984,7 +1013,7 @@ class Engine {
     public function setPath($path) 
     {
         if (!file_exists($path)) {
-            throw new \RuntimeException(sprintf('Can\'t find template folder %s. Please check path.', $path));
+            throw new RuntimeException(sprintf('Can\'t find template folder %s. Please check path.', $path));
         }
 
         // set default path for partials and inheritence.
@@ -1003,6 +1032,7 @@ class Engine {
     public function setVars(array $vars) 
     {
         $this->vars = $vars;
+        $this->cache = []; //Invalidate cache
 
         return $this;
     }
@@ -1016,6 +1046,7 @@ class Engine {
      */
     public function setVar($n, $v) 
     {
+        $this->cache = []; //Invalidate cache
         return $this->set($this->vars, $n, $v);
     }
     
@@ -1052,7 +1083,7 @@ class Engine {
     public function registerFilter($name, Closure $filter) 
     {
         if ($this->hasFilter($name)) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 sprintf('Filter name "%s" is already use. Please choose something else.', $name)
             );
         }
@@ -1072,8 +1103,8 @@ class Engine {
     public function removeFilter($name) 
     {
         if (isset($this->locked_filters[$name])) {
-            throw new \RuntimeException(
-                sprintf('This filter (%s) cannot removed because it is locked.', $name)
+            throw new RuntimeException(
+                sprintf('This filter (%s) cannot be removed because it is locked.', $name)
             );
         }
         unset($this->filters[$name]);

@@ -13,9 +13,7 @@
 <p>
 <strong>Developers (<?= o('page.devs|length') ?>)</strong><br />
 <ul>
-<?php foreach (o('page.devs') as $dev) { ?>
-<li><?= $dev ?></li>
-<?php } ?>
+<?php o('page.devs|each'); ?>
 </ul>
 </p>
 <?php } ?>
