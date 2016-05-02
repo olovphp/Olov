@@ -13,7 +13,7 @@
 <p>
 <strong>Developers (<?= o('page.devs|length') ?>)</strong><br />
 <ul>
-<?php o('page.devs|each'); ?>
+<?php o('page.devs|each:p'); ?>
 </ul>
 </p>
 <?php } ?>
