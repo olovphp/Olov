@@ -281,7 +281,7 @@ class Engine {
                     case 'array':
                         // parse property maps (ex -- "a:href" => "http://link.com")
                         // -----------------------------------------------------------
-                        // The text we'll wrap with our tags is the one that isn't mapped to a
+                        // The <tag>text</tag> we will wrap with our tags is the one that isn't mapped to a
                         // property. If we find more than one of such, we will overwrite it 
                         // with each new occurance. If none is found we will use "undefined" 
                         // as a visual notice to whomever it may concern!
@@ -289,36 +289,32 @@ class Engine {
                         $props = []; $text = "undefined";
                         foreach ($v as $pk=>$pv) {
 
-                            if (preg_match($pattern, $pk, $_)) {
+                            if (preg_match($pattern, (string)$pk, $_)) {
                                 $props[$_[1]][] = $_[2]."=\"$pv\"";
                             } else {
-                                $text = (string)$pv;
+                                $text = $pv;
                             }
                         }
 
                         $tgo = $tgc = "";
                         foreach ($tg_stack as $tg) {
-                            $plist = isset($props[$tg]) ? implode(' ', $props[$tg]) : '';
-                            $tgo = "<$tg $plist>$tgo";
+                            $plist = isset($props[$tg]) ? ' '.implode(' ', $props[$tg]) : '';
+                            $tgo = "<$tg$plist>$tgo";
                             $tgc = "$tgc</$tg>";
                         }
                         break;
-                    case 'string':
-                    case 'integer':
-                    case 'double':
+                    default:
                         $tgo = $tgc = "";
                         foreach ($tg_stack as $tg) {
                             $tgo = "<$tg>$tgo";
                             $tgc = "$tgc</$tg>";
                         }
-                        $text = (string)$v;
+                        $text = $v;
                         break;
-
-                    default: 
-                        return $str;
 
                     }
 
+                    $text = (is_string($text) || is_numeric($text)) ? (string)$text : gettype($text);
                     return "$str$tgo" . htmlspecialchars($text, ENT_COMPAT, 'UTF-8') . "$tgc\n";
 
                 }, "");

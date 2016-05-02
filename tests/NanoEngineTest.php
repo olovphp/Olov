@@ -35,12 +35,14 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
                     'php', 
                     'nano', 
                     'esca>pe<=me', 
-                    ['template'], 
+                    ['template', new DateTime()], 
+                    [new DateTime()],
                     new DateTime()
                 ], 
                 'links' => [
                     'Who? Me?', 
-                    ['bro'=>'Facebook >>>', 'a:href'=>'http://facebook.com', 'li:class'=>'item'], 
+                    ['a:href'=>'http://unknown.com', 'li:class'=>'item'], 
+                    ['text'=>'Facebook', 'bro'=>'Facebook >>>', 'a:href'=>'http://facebook.com', 'li:class'=>'item'], 
                     ['text'=>'Instagram', 'a:href'=>'http://instagram.com', 'li:class'=>'item'], 
                     ['txt'=>'Twitter', 'a:href'=>'http://twitter.com', 'li:class'=>'item'], 
                     ['val'=>'LinkedIn', 'a:href'=>'http://linkedin.com', 'li:class'=>'item'], 
@@ -178,10 +180,24 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
                     $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
                     return "$str<li><a><b>$v</b></a></li>\n";
                 }, "")
-            ] , 
+            ], 
+            ["page.mixed|each:b,a,li", array_reduce(
+                ['php', 'nano', 'esca>pe<=me', ['template', 'object'], ['object'], 'object'],
+                function ($str, $v) {
+                    if (!is_string($v) && !is_numeric($v) && !is_array($v)) return $str;
+                    if (is_array($v)) {
+                        $v = array_pop($v);
+                    }
+
+                    $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
+
+                    return "$str<li><a><b>$v</b></a></li>\n";
+                }, "")
+            ], 
             [
                 "page.links|each:a,li",
                 '<li><a>Who? Me?</a></li>' . "\n" .  
+                '<li class="item"><a href="http://unknown.com">undefined</a></li>' . "\n" . 
                 '<li class="item"><a href="http://facebook.com">Facebook &gt;&gt;&gt;</a></li>' . "\n" . 
                 '<li class="item"><a href="http://instagram.com">Instagram</a></li>' . "\n" .  
                 '<li class="item"><a href="http://twitter.com">Twitter</a></li>' . "\n" . 
@@ -198,15 +214,6 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
 
 
 
-            ["page.mixed|each:b,a,li", array_reduce(
-                ['php', 'nano', 'esca>pe<=me', ['template'], new DateTime()],
-                function ($str, $v) {
-                    if (!is_string($v) && !is_numeric($v)) return $str;
-                    else $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
-
-                    return "$str<li><a><b>$v</b></a></li>\n";
-                }, "")
-            ]
 
 
 
