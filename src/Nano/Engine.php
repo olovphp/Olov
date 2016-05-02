@@ -237,25 +237,90 @@ class Engine {
                 }, (array)$var);
         };
 
-        $this->filters['each'] = function ($arr = [], $tg = 'li') {
-            static $tags = ['li'=>1, 'div'=>1, 'p'=>1, 'span'=>1, 'td'=>1, 'tr'=>1];
+        /**
+         *  - Treats $var as an array (we will also cast string to array!). 
+         *  - Wraps each tag (listed in func args) around each item.
+         *  - First tag is the innermost wrap
+         *  - Last tag is the outermost wrap
+         *  - If variable is an array of associative arrays we will 
+         *    attempt to parse tag property maps.
+         *
+         *  @param mixed $var
+         *  @param string $tg    
+         */
+        $this->filters['each'] = function ($arr = [], $tag = 'li') {
+            static $tags = [
+                'a'=>1, 'b'=>1, 'u'=>1, 'i'=>1, 
+                'strong'=>1, 'li'=>1, 'div'=>1, 'p'=>1, 
+                'span'=>1, 'td'=>1, 'tr'=>1
+            ];
+            $tg_stack = func_get_args(); array_shift($tg_stack);
+            if (empty($tg_stack)) $tg_stack = [$tag];
 
-            if (!is_string($tg)) {
-                throw new InvalidArgumentException('Argument must be a string.');
+            foreach ($tg_stack as &$tg) {
+
+                if (!is_string($tg)) {
+                    throw new InvalidArgumentException('Argument must be a string.');
+                }
+
+                $tg = trim(strtolower($tg));
+                if (!isset($tags[$tg])) {
+                    throw new InvalidArgumentException(
+                        sprintf(
+                            'The "%s" tag is not allowed (see allowed tags: %s)', $tg, 
+                            implode(' | ', array_keys($tags))
+                        )
+                    );
+                }
+
             }
 
-            $tg = trim(strtolower($tg));
-            if (!isset($tags[$tg])) {
-                throw new InvalidArgumentException(
-                    sprintf(
-                        'The "%s" tag is not allowed (see allowed tags: %s)', $tg, 
-                        implode(' | ', array_keys($tags))
-                    )
-                );
-            }
+            $result = array_reduce((array)$arr, function ($str, $v) use ($tg_stack) { 
 
-            $result = array_reduce((array)$arr, function ($str, $v) use ($tg) { 
-                    return "$str<$tg>$v</$tg>\n";
+                    switch (gettype($v)) {
+                    case 'array':
+                        // parse property maps (ex -- "a:href" => "http://link.com")
+                        // -----------------------------------------------------------
+                        // The text we'll wrap with our tags is the one that isn't mapped to a
+                        // property. If we find more than one of such, we will overwrite it 
+                        // with each new occurance. If none is found we will use "undefined" 
+                        // as a visual notice to whomever it may concern!
+                        $pattern = '/^('.implode('|', $tg_stack).'):(.*)$/';
+                        $props = []; $text = "undefined";
+                        foreach ($v as $pk=>$pv) {
+
+                            if (preg_match($pattern, $pk, $_)) {
+                                $props[$_[1]][] = $_[2]."=\"$pv\"";
+                            } else {
+                                $text = (string)$pv;
+                            }
+                        }
+
+                        $tgo = $tgc = "";
+                        foreach ($tg_stack as $tg) {
+                            $plist = isset($props[$tg]) ? implode(' ', $props[$tg]) : '';
+                            $tgo = "<$tg $plist>$tgo";
+                            $tgc = "$tgc</$tg>";
+                        }
+                        break;
+                    case 'string':
+                    case 'integer':
+                    case 'double':
+                        $tgo = $tgc = "";
+                        foreach ($tg_stack as $tg) {
+                            $tgo = "<$tg>$tgo";
+                            $tgc = "$tgc</$tg>";
+                        }
+                        $text = (string)$v;
+                        break;
+
+                    default: 
+                        return $str;
+
+                    }
+
+                    return "$str$tgo" . htmlspecialchars($text, ENT_COMPAT, 'UTF-8') . "$tgc\n";
+
                 }, "");
             echo $result;
             return $result;
@@ -875,8 +940,8 @@ class Engine {
         if (preg_match('/^[a-zA-Z]/', $q)) {
             // assume it's a variable
             $var = explode('|', $q);
-            $name = $var[0];
-            $var[0] = 'esc'; // add escape filter
+            $name = array_shift($var);
+            if (!isset($var[0]) || substr($var[0], 0, 4) !== 'each') array_unshift($var, 'esc'); // add escape filter
             return [
                 'type'=>'variable', 
                 'name'=>$name, 

@@ -30,7 +30,23 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
                     'esca>pe<=me', 
                     'template',
                     'html'
+                ], 
+                'mixed' => [
+                    'php', 
+                    'nano', 
+                    'esca>pe<=me', 
+                    ['template'], 
+                    new DateTime()
+                ], 
+                'links' => [
+                    'Who? Me?', 
+                    ['bro'=>'Facebook >>>', 'a:href'=>'http://facebook.com', 'li:class'=>'item'], 
+                    ['text'=>'Instagram', 'a:href'=>'http://instagram.com', 'li:class'=>'item'], 
+                    ['txt'=>'Twitter', 'a:href'=>'http://twitter.com', 'li:class'=>'item'], 
+                    ['val'=>'LinkedIn', 'a:href'=>'http://linkedin.com', 'li:class'=>'item'], 
+                    ['value'=>'Pinterest', 'a:href'=>'http://pinterest.com', 'li:class'=>'item'], 
                 ]
+
             ]
         ];
 
@@ -83,7 +99,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
      * @covers ::__invoke
      * @dataProvider badArgQueryProvider
      * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Invalid HTML tag "ul". Allowed tags: li | div | p | span | td | tr
+     * @expectedExceptionMessageContains Allowed tags:
      *
      * @param mixed $query
      * @access public
@@ -155,8 +171,47 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
                     $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
                     return "$str<div>$v</div>\n";
                 }, "")
-            ] 
+            ] , 
+            ["page.tags|each:b,a,li", array_reduce(
+                ['php', 'nano', 'esca>pe<=me', 'template', 'html'],
+                function ($str, $v) {
+                    $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
+                    return "$str<li><a><b>$v</b></a></li>\n";
+                }, "")
+            ] , 
+            [
+                "page.links|each:a,li",
+                '<li><a>Who? Me?</a></li>' . "\n" .  
+                '<li class="item"><a href="http://facebook.com">Facebook &gt;&gt;&gt;</a></li>' . "\n" . 
+                '<li class="item"><a href="http://instagram.com">Instagram</a></li>' . "\n" .  
+                '<li class="item"><a href="http://twitter.com">Twitter</a></li>' . "\n" . 
+                '<li class="item"><a href="http://linkedin.com">LinkedIn</a></li>' . "\n" .  
+                '<li class="item"><a href="http://pinterest.com">Pinterest</a></li>' . "\n"
+            ]
         ];
+
+
+
+
+
+        /*
+
+
+
+            ["page.mixed|each:b,a,li", array_reduce(
+                ['php', 'nano', 'esca>pe<=me', ['template'], new DateTime()],
+                function ($str, $v) {
+                    if (!is_string($v) && !is_numeric($v)) return $str;
+                    else $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
+
+                    return "$str<li><a><b>$v</b></a></li>\n";
+                }, "")
+            ]
+
+
+
+
+         */
     }
 
     /**
