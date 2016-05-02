@@ -7,11 +7,23 @@ $vars = [
         'title' => 'Welcome to Nano', 
         'body' => 'Nano is a micro template <b><u>engine</u></b> for PHP.',
         'devs' => [
-            'Lanre Onabanjo <script>alert("I am malificient");</script>', 
-            'Grace Huang', 
-            'Ray Lin', 
-            'Gboyega Dada'
+            [
+                'name'=>'Lanre Onabanjo <script>alert("I am malificient");</script>', 
+                'a:href'=>'mailto:lbanjo@gmail.com'
+            ], 
+            [
+                'name'=>'Grace Huang', 
+                'a:href'=>'mailto:grace@aol.com'
+            ], 
+            [
+                'name'=>'Ray Lin',
+            ], 
+            [
+                'name'=>'Gboyega Dada',
+                'a:href'=>'mailto:boyega@gmail.com'
             ]
+        ]
+
     ]
 ];
 
