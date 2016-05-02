@@ -248,7 +248,7 @@ class Engine {
             if (!isset($tags[$tg])) {
                 throw new InvalidArgumentException(
                     sprintf(
-                        'Invalid HTML tag "%s". Allowed tags: %s', $tg, 
+                        'The "%s" tag is not allowed (see allowed tags: %s)', $tg, 
                         implode(' | ', array_keys($tags))
                     )
                 );
