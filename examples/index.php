@@ -13,10 +13,18 @@ $vars = [
             ], 
             [
                 'name'=>'Grace Huang', 
-                'a:href'=>'mailto:grace@aol.com'
+                'a:href'=>'mailto:grace@aol.com', 
+                'input:type'=>'radio', 
+                'input:name'=>'dev', 
+                'input:value'=>'Grace Hunag' 
+
             ], 
             [
                 'name'=>'Ray Lin',
+                'input:type'=>'radio', 
+                'input:name'=>'dev', 
+                'input:value'=>'Ray Lin' 
+
             ], 
             [
                 'name'=>'Gboyega Dada',
