@@ -1,6 +1,5 @@
 <?php o('::base.html.php') ?>
 
-
 <?php o('+content'); ?>
 <div class="article">
 <p>
