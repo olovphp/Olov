@@ -1,5 +1,11 @@
 <?php
-
+/**
+ * Nano Template Engine (https://github.com/gboyega/nano)
+ *
+ * @link      https://github.com/gboyega/nano
+ * @copyright Copyright (c) 2016 Gboyega Dada
+ * @license   https://github.com/gboyega/nano/blob/master/gpl-3.0.txt (GPLv3 License)
+ */
 
 namespace Nano;
 
@@ -12,9 +18,8 @@ use Closure;
 /**
  * Nano template engine.
  *
- * @package FPP Labs Package
  * @author Gboyega Dada <gboyega@fpplabs.com>
- * @version $Id$
+ * @version 1.0
  */
 class Engine {
 

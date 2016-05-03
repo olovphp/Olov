@@ -1,4 +1,13 @@
 <?php
+/**
+ * Nano Template Engine (https://github.com/gboyega/nano)
+ *
+ * @link      https://github.com/gboyega/nano
+ * @copyright Copyright (c) 2016 Gboyega Dada
+ * @license   https://github.com/gboyega/nano/blob/master/gpl-3.0.txt (GPLv3 License)
+ * @author Gboyega Dada <gboyega@fpplabs.com>
+ * @version 1.0
+ */
 
 if (!function_exists('o')) {
 
