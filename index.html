@@ -33,36 +33,35 @@ like this <code>&lt;?php o('-blockname') ?&gt;</code>. </p>
 
 <p><em>Example of block definitions:</em></p>
 
-<pre><code>&lt;?php /* ============  ./base.html.php ===============  */ ?&gt;
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">&lt;</span>?<span class="pl-c1">php</span> <span class="pl-c">/* ============  ./base.html.php ===============  */</span> </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 &lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;head&gt;&lt;title&gt;Welcome to Olov!&lt;/title&gt;&lt;/head&gt;
-&lt;body&gt;
-&lt;div class="header"&gt;
-&lt;?php o('+header'); ?&gt;
-&lt;h3&gt;Default Header Content&lt;/h3&gt;
-&lt;?php o('-header'); ?&gt;
-&lt;/div&gt;
+&lt;<span class="pl-ent">html</span>&gt;
+&lt;<span class="pl-ent">head</span>&gt;&lt;<span class="pl-ent">title</span>&gt;Welcome to Olov!&lt;/<span class="pl-ent">title</span>&gt;&lt;/<span class="pl-ent">head</span>&gt;
+&lt;<span class="pl-ent">body</span>&gt;
+&lt;<span class="pl-ent">div</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>header<span class="pl-pds">"</span></span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>+header<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;<span class="pl-ent">h3</span>&gt;Default Header Content&lt;/<span class="pl-ent">h3</span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>-header<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;/<span class="pl-ent">div</span>&gt;
 
-&lt;div class="content"&gt;
-&lt;?php o('+content'); ?&gt;
-&lt;p&gt;
+&lt;<span class="pl-ent">div</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>content<span class="pl-pds">"</span></span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>+content<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;<span class="pl-ent">p</span>&gt;
 The default content goes here and can be replaced in a child template that 
 extends this one.
-&lt;/p&gt;
-&lt;?php o('-content'); ?&gt;
-&lt;/div&gt;
+&lt;/<span class="pl-ent">p</span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>-content<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;/<span class="pl-ent">div</span>&gt;
 
-&lt;div class="footer"&gt;
-&lt;?php o('+footer'); ?&gt;
-&lt;hr /&gt;
-&lt;small&gt;&amp;copy; 2016 Default Footer Content&lt;/small&gt;
-&lt;?php o('-footer'); ?&gt;
-&lt;/div&gt;
+&lt;<span class="pl-ent">div</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>footer<span class="pl-pds">"</span></span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>+footer<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;<span class="pl-ent">hr</span> /&gt;
+&lt;<span class="pl-ent">small</span>&gt;<span class="pl-c1">&amp;copy;</span> 2016 Default Footer Content&lt;/<span class="pl-ent">small</span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>-footer<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;/<span class="pl-ent">div</span>&gt;
 
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
+&lt;/<span class="pl-ent">body</span>&gt;
+&lt;/<span class="pl-ent">html</span>&gt;</pre></div>
 
 <hr>
 
@@ -72,27 +71,26 @@ extends this one.
 <p>To extend another template, at the very top, do: <code>&lt;?php o('::base.html.php') ?&gt;</code> 
 <em>See example of block definitions below.</em></p>
 
-<pre><code>&lt;?php /* ==============  ./hello.html.php  ============ */ ?&gt;
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">&lt;</span>?<span class="pl-c1">php</span> <span class="pl-c">/* ==============  ./hello.html.php  ============ */</span> </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;?php o('::base.html.php');  ?&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>::base.html.php<span class="pl-pds">'</span></span>);  </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;?php o('+header'); ?&gt;
-&lt;h2&gt;Pimp My Header&lt;/h2&gt;
-&lt;?php o('-header'); ?&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>+header<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;<span class="pl-ent">h2</span>&gt;Pimp My Header&lt;/<span class="pl-ent">h2</span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>-header<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;?php o('+content'); ?&gt;
-&lt;p&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>+content<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;<span class="pl-ent">p</span>&gt;
 To override the default +content block, create one in the child template 
 and put whatever youu like in the new block!
-&lt;/p&gt;
-&lt;?php o('-content'); ?&gt;
+&lt;/<span class="pl-ent">p</span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>-content<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;?php o('+footer'); ?&gt;
-&lt;hr /&gt;
-&lt;small&gt;&amp;copy; 2020 &lt;i&gt;Hmm, upgrades.&lt;/i&gt;&lt;/small&gt;
-&lt;?php o('-footer'); ?&gt;
-
-</code></pre>
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>+footer<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;<span class="pl-ent">hr</span> /&gt;
+&lt;<span class="pl-ent">small</span>&gt;<span class="pl-c1">&amp;copy;</span> 2020 &lt;<span class="pl-ent">i</span>&gt;Hmm, upgrades.&lt;/<span class="pl-ent">i</span>&gt;&lt;/<span class="pl-ent">small</span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>-footer<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+</pre></div>
 
 <hr>
 
@@ -102,23 +100,22 @@ and put whatever youu like in the new block!
 <p>To include a template partial, do: <code>&lt;?php o(':partial.html.php') ?&gt;</code> 
 <em>See example of partial include below (note the difference between the syntax for ::exending and :including)</em></p>
 
-<pre><code>&lt;?php /* ==============  ./hello.html.php  ============ */ ?&gt;
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">&lt;</span>?<span class="pl-c1">php</span> <span class="pl-c">/* ==============  ./hello.html.php  ============ */</span> </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;?php o('::base.html.php');  ?&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>::base.html.php<span class="pl-pds">'</span></span>);  </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;?php o('+header'); ?&gt;
-&lt;?php o(':header.html.php'); ?&gt;
-&lt;?php o('-header'); ?&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>+header<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>:header.html.php<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>-header<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;?php o('+content'); ?&gt;
-&lt;p&gt;Content body here.&lt;/p&gt;
-&lt;?php o('-content'); ?&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>+content<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;<span class="pl-ent">p</span>&gt;Content body here.&lt;/<span class="pl-ent">p</span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>-content<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;?php o('+footer'); ?&gt;
-&lt;?php o(':footer.html.php'); ?&gt;
-&lt;?php o('-footer'); ?&gt;
-
-</code></pre>
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>+footer<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>:footer.html.php<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>-footer<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+</pre></div>
 
 <hr>
 
@@ -127,69 +124,66 @@ and put whatever youu like in the new block!
 
 <p>You can define your template variables in an associative <code>array[]</code> like this:</p>
 
-<pre><code>&lt;?php 
-
-/* ============== ./index.php =================== */ 
-// Include `Olov\Engine` class (or use composer autoloader)
-require '../path/to/olov/src/Olov/Engine.php';
-
-// Declare vars...
-$vars = [
-    'page' =&gt; [
-        'title' =&gt; 'Olov Template Engine for PHP', 
-        'body'  =&gt;  'Values are automatically &lt;b&gt;escaped&lt;/b&gt; when used the template.', 
-        'tags'  =&gt; [
-            'php', 'template engine', 'olov'
-        ]
-    ];
-</code></pre>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">&lt;</span>?<span class="pl-c1">php</span> </span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c">/* ============== ./index.php =================== */</span> </span>
+<span class="pl-s1"><span class="pl-c">// Include `Olov\Engine` class (or use composer autoloader)</span></span>
+<span class="pl-s1"><span class="pl-k">require</span> <span class="pl-s"><span class="pl-pds">'</span>../path/to/olov/src/Olov/Engine.php<span class="pl-pds">'</span></span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c">// Declare vars...</span></span>
+<span class="pl-s1"><span class="pl-smi">$vars</span> <span class="pl-k">=</span> [</span>
+<span class="pl-s1">    <span class="pl-s"><span class="pl-pds">'</span>page<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> [</span>
+<span class="pl-s1">        <span class="pl-s"><span class="pl-pds">'</span>title<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">'</span>Olov Template Engine for PHP<span class="pl-pds">'</span></span>, </span>
+<span class="pl-s1">        <span class="pl-s"><span class="pl-pds">'</span>body<span class="pl-pds">'</span></span>  <span class="pl-k">=&gt;</span>  <span class="pl-s"><span class="pl-pds">'</span>Values are automatically &lt;b&gt;escaped&lt;/b&gt; when used the template.<span class="pl-pds">'</span></span>, </span>
+<span class="pl-s1">        <span class="pl-s"><span class="pl-pds">'</span>tags<span class="pl-pds">'</span></span>  <span class="pl-k">=&gt;</span> [</span>
+<span class="pl-s1">            <span class="pl-s"><span class="pl-pds">'</span>php<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>template engine<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>olov<span class="pl-pds">'</span></span></span>
+<span class="pl-s1">        ]</span>
+<span class="pl-s1">    ];</span></pre></div>
 
 <p><strong>Then create Olov engine instance and render:</strong></p>
 
-<pre><code>// Our templates folder...
-$templates_path = "./my/templates/folder/":
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-c">// Our templates folder...</span></span>
+<span class="pl-s1"><span class="pl-smi">$templates_path</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>./my/templates/folder/<span class="pl-pds">"</span></span>:</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c">// New instance of `Olov\Engine`</span></span>
+<span class="pl-s1"><span class="pl-smi">$Olov</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Olov\</span><span class="pl-c1">Engine</span>(<span class="pl-smi">$templates_path</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c">// Render...</span></span>
+<span class="pl-s1"><span class="pl-smi">$Olov</span><span class="pl-k">-&gt;</span>render(<span class="pl-s"><span class="pl-pds">'</span>hello.html.php<span class="pl-pds">'</span></span>, <span class="pl-smi">$vars</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"></span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-// New instance of `Olov\Engine`
-$Olov = new Olov\Engine($templates_path);
-
-// Render...
-$Olov-&gt;render('hello.html.php', $vars);
-
-?&gt;
-
-
-</code></pre>
+</pre></div>
 
 <p><strong>Our template: ./hello.html.php</strong></p>
 
-<pre><code>&lt;?php /* ==============  ./hello.html.php  ============ */ ?&gt;
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">&lt;</span>?<span class="pl-c1">php</span> <span class="pl-c">/* ==============  ./hello.html.php  ============ */</span> </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;?php o('::base.html.php');  ?&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>::base.html.php<span class="pl-pds">'</span></span>);  </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;?php o('+header'); ?&gt;
-&lt;h2&gt;&lt;?= o('page.title') ?&gt;&lt;/h2&gt;
-&lt;?php o('-header'); ?&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>+header<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;<span class="pl-ent">h2</span>&gt;<span class="pl-pse">&lt;?=</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>page.title<span class="pl-pds">'</span></span>) </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>&lt;/<span class="pl-ent">h2</span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>-header<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;?php o('+content'); ?&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>+content<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;p&gt;
-&lt;?= o('page.body') ?&gt;
-&lt;/p&gt;
+&lt;<span class="pl-ent">p</span>&gt;
+<span class="pl-pse">&lt;?=</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>page.body<span class="pl-pds">'</span></span>) </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;/<span class="pl-ent">p</span>&gt;
 
-&lt;p&gt;&lt;small&gt;Character count: &lt;?= o('page.body|length') ?&gt;&lt;/small&gt;&lt;/p&gt;
+&lt;<span class="pl-ent">p</span>&gt;&lt;<span class="pl-ent">small</span>&gt;Character count: <span class="pl-pse">&lt;?=</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>page.body|length<span class="pl-pds">'</span></span>) </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>&lt;/<span class="pl-ent">small</span>&gt;&lt;/<span class="pl-ent">p</span>&gt;
 
-&lt;ul&gt;
-&lt;?php o('page.tags|each:i,li'); ?&gt;
-&lt;/ul&gt;
+&lt;<span class="pl-ent">ul</span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>page.tags|each:i,li<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;/<span class="pl-ent">ul</span>&gt;
 
-&lt;?php o('-content'); ?&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>-content<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
 
-&lt;?php o('+footer'); ?&gt;
-&lt;hr /&gt;
-&lt;small&gt;&amp;copy; 2020 &lt;i&gt;Hmm, upgrades.&lt;/i&gt;&lt;/small&gt;
-&lt;?php o('-footer'); ?&gt;
-
-</code></pre>
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>+footer<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;<span class="pl-ent">hr</span> /&gt;
+&lt;<span class="pl-ent">small</span>&gt;<span class="pl-c1">&amp;copy;</span> 2020 &lt;<span class="pl-ent">i</span>&gt;Hmm, upgrades.&lt;/<span class="pl-ent">i</span>&gt;&lt;/<span class="pl-ent">small</span>&gt;
+<span class="pl-pse">&lt;?php</span><span class="pl-s1"> o(<span class="pl-s"><span class="pl-pds">'</span>-footer<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+</pre></div>
 
 <hr>
 
@@ -198,10 +192,9 @@ $Olov-&gt;render('hello.html.php', $vars);
 
 <p>You can automatically print array values by doing: </p>
 
-<pre><code>&lt;ul&gt;
-&lt;?php o('page.tags|each'); ?&gt;
-&lt;/ul&gt;
-</code></pre>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">&lt;</span><span class="pl-c1">ul</span><span class="pl-k">&gt;</span></span>
+<span class="pl-s1"><span class="pl-k">&lt;</span>?<span class="pl-c1">php</span> o(<span class="pl-s"><span class="pl-pds">'</span>page.tags|each<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;/<span class="pl-ent">ul</span>&gt;</pre></div>
 
 <p>This will output:</p>
 
@@ -214,41 +207,36 @@ $Olov-&gt;render('hello.html.php', $vars);
 <p>Olov wraps your array values with the <code>&lt;li&gt;</code> by default and auto escapes the text values. 
 Olov can also wrap your loop items in multiple concentric layers of tags. For eaxample:</p>
 
-<pre><code>&lt;?php o('page.tags|each:b,a,li'); ?&gt;
-</code></pre>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">&lt;</span>?<span class="pl-c1">php</span> o(<span class="pl-s"><span class="pl-pds">'</span>page.tags|each:b,a,li<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span></pre></div>
 
 <p>Outputs:</p>
 
-<pre><code>&lt;li&gt;&lt;a&gt;&lt;b&gt;Text Value&lt;/b&gt;&lt;/a&gt;&lt;/li&gt;
-</code></pre>
+<div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">li</span>&gt;&lt;<span class="pl-ent">a</span>&gt;&lt;<span class="pl-ent">b</span>&gt;Text Value&lt;/<span class="pl-ent">b</span>&gt;&lt;/<span class="pl-ent">a</span>&gt;&lt;/<span class="pl-ent">li</span>&gt;</pre></div>
 
 <p>To set tag properties and attributes, define your list in your <code>$vars</code> array like this:</p>
 
-<pre><code>$vars = [
-    // ....
-    'users' =&gt; [
-        ['Jamie Foxx', 'a:href'=&gt;'https://en.wikipedia.org/wiki/Jamie_Foxx', 'li:class'=&gt;'name'],   
-        ['Marlon Brando', 'a:href'=&gt;'https://en.wikipedia.org/wiki/Marlon_Brando', 'li:class'=&gt;'name'],   
-        ['Thandie Newton', 'a:href'=&gt;'https://en.wikipedia.org/wiki/Thandie_Newton', 'li:class'=&gt;'name']
-    ]
-];
-</code></pre>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-smi">$vars</span> <span class="pl-k">=</span> [</span>
+<span class="pl-s1">    <span class="pl-c">// ....</span></span>
+<span class="pl-s1">    <span class="pl-s"><span class="pl-pds">'</span>users<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> [</span>
+<span class="pl-s1">        [<span class="pl-s"><span class="pl-pds">'</span>Jamie Foxx<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>a:href<span class="pl-pds">'</span></span><span class="pl-k">=&gt;</span><span class="pl-s"><span class="pl-pds">'</span>https://en.wikipedia.org/wiki/Jamie_Foxx<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>li:class<span class="pl-pds">'</span></span><span class="pl-k">=&gt;</span><span class="pl-s"><span class="pl-pds">'</span>name<span class="pl-pds">'</span></span>],   </span>
+<span class="pl-s1">        [<span class="pl-s"><span class="pl-pds">'</span>Marlon Brando<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>a:href<span class="pl-pds">'</span></span><span class="pl-k">=&gt;</span><span class="pl-s"><span class="pl-pds">'</span>https://en.wikipedia.org/wiki/Marlon_Brando<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>li:class<span class="pl-pds">'</span></span><span class="pl-k">=&gt;</span><span class="pl-s"><span class="pl-pds">'</span>name<span class="pl-pds">'</span></span>],   </span>
+<span class="pl-s1">        [<span class="pl-s"><span class="pl-pds">'</span>Thandie Newton<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>a:href<span class="pl-pds">'</span></span><span class="pl-k">=&gt;</span><span class="pl-s"><span class="pl-pds">'</span>https://en.wikipedia.org/wiki/Thandie_Newton<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>li:class<span class="pl-pds">'</span></span><span class="pl-k">=&gt;</span><span class="pl-s"><span class="pl-pds">'</span>name<span class="pl-pds">'</span></span>]</span>
+<span class="pl-s1">    ]</span>
+<span class="pl-s1">];</span></pre></div>
 
 <p>Then...</p>
 
-<pre><code>&lt;ul class="hollywood-actors"&gt;
-&lt;?php o('page.tags|each:a,li'); ?&gt;
-&lt;/ul&gt;
-</code></pre>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">&lt;</span><span class="pl-c1">ul</span> <span class="pl-k">class</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>hollywood-actors<span class="pl-pds">"</span></span><span class="pl-k">&gt;</span></span>
+<span class="pl-s1"><span class="pl-k">&lt;</span>?<span class="pl-c1">php</span> o(<span class="pl-s"><span class="pl-pds">'</span>page.tags|each:a,li<span class="pl-pds">'</span></span>); </span><span class="pl-pse"><span class="pl-s1">?</span>&gt;</span>
+&lt;/<span class="pl-ent">ul</span>&gt;</pre></div>
 
 <p>Throw in the blender and ...</p>
 
-<pre><code>&lt;ul class="hollywood-actors"&gt;
-&lt;li class="name"&gt;&lt;a href="https://en.wikipedia.org/wiki/Jamie_Foxx"&gt;Jamie Foxx&lt;/a&gt;&lt;/li&gt;
-&lt;li class="name"&gt;&lt;a href="https://en.wikipedia.org/wiki/Marlon_Brando"&gt;Marlon Brando&lt;/a&gt;&lt;/li&gt;
-&lt;li class="name"&gt;&lt;a href="https://en.wikipedia.org/wiki/Thandie_Newton"&gt;Thandie Newton&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</code></pre>
+<div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">ul</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>hollywood-actors<span class="pl-pds">"</span></span>&gt;
+&lt;<span class="pl-ent">li</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>&gt;&lt;<span class="pl-ent">a</span> <span class="pl-e">href</span>=<span class="pl-s"><span class="pl-pds">"</span>https://en.wikipedia.org/wiki/Jamie_Foxx<span class="pl-pds">"</span></span>&gt;Jamie Foxx&lt;/<span class="pl-ent">a</span>&gt;&lt;/<span class="pl-ent">li</span>&gt;
+&lt;<span class="pl-ent">li</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>&gt;&lt;<span class="pl-ent">a</span> <span class="pl-e">href</span>=<span class="pl-s"><span class="pl-pds">"</span>https://en.wikipedia.org/wiki/Marlon_Brando<span class="pl-pds">"</span></span>&gt;Marlon Brando&lt;/<span class="pl-ent">a</span>&gt;&lt;/<span class="pl-ent">li</span>&gt;
+&lt;<span class="pl-ent">li</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>&gt;&lt;<span class="pl-ent">a</span> <span class="pl-e">href</span>=<span class="pl-s"><span class="pl-pds">"</span>https://en.wikipedia.org/wiki/Thandie_Newton<span class="pl-pds">"</span></span>&gt;Thandie Newton&lt;/<span class="pl-ent">a</span>&gt;&lt;/<span class="pl-ent">li</span>&gt;
+&lt;/<span class="pl-ent">ul</span>&gt;</pre></div>
 
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Jamie_Foxx">Jamie Foxx</a></li>
@@ -263,13 +251,11 @@ Olov can also wrap your loop items in multiple concentric layers of tags. For ea
 
 <p>You can <a href="https://getcomposer.org/doc/03-cli.md">require</a> with Composer:</p>
 
-<pre><code>$ composer require "olov/olov:~1.0"
-</code></pre>
+<div class="highlight highlight-source-shell"><pre>$ composer require <span class="pl-s"><span class="pl-pds">"</span>olov/olov:~1.0<span class="pl-pds">"</span></span></pre></div>
 
 <p>Or clone this repo with:</p>
 
-<pre><code>$ git clone https://github.com/olovphp/Olov.git
-</code></pre>
+<div class="highlight highlight-source-shell"><pre>$ git clone https://github.com/olovphp/Olov.git</pre></div>
 
 <p>Or download the zip folder.</p>
 
