@@ -1,8 +1,8 @@
 <?php
 /**
- * Olov Template Engine (https://github.com/olovphp/Olov)
+ * Olov PHP Template Engine (http://olovphp.github.io/Olov)
  *
- * @link      https://github.com/olovphp/Olov
+ * @link      http://olovphp.github.io/Olov
  * @copyright Copyright (c) 2016 Gboyega Dada
  * @license   https://github.com/olovphp/Olov/blob/master/gpl-3.0.txt (GPLv3 License)
  * @author Gboyega Dada <gboyega@fpplabs.com>
