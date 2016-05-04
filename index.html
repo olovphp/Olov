@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Olov by olovphp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Olov</h1>
+      <h2 class="project-tagline">Olov is a micro templating engine for PHP. </h2>
+      <a href="https://github.com/olovphp/Olov" class="btn">View on GitHub</a>
+      <a href="https://github.com/olovphp/Olov/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/olovphp/Olov/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h2>
+<a id="olov-is-a-micro-templating-engine-for-php" class="anchor" href="#olov-is-a-micro-templating-engine-for-php" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Olov is a micro templating engine for PHP</h2>
+
+<p>Olov uses native PHP templates but with a single elegant function <code>o()</code> 
+to help you do amazing things with very simple syntax.</p>
+
+<h4>
+<a id="1-defining-blocks" class="anchor" href="#1-defining-blocks" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>1. Defining blocks...</h4>
+
+<p>Blocks are defined like this: <code>&lt;?php o('+blockname') ?&gt;</code> with a matching close 
+like this <code>&lt;?php o('-blockname') ?&gt;</code>. </p>
+
+<p><em>Example of block definitions:</em></p>
+
+<pre><code>&lt;?php /* ============  ./base.html.php ===============  */ ?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Welcome to Olov!&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;div class="header"&gt;
+&lt;?php o('+header'); ?&gt;
+&lt;h3&gt;Default Header Content&lt;/h3&gt;
+&lt;?php o('-header'); ?&gt;
+&lt;/div&gt;
+
+&lt;div class="content"&gt;
+&lt;?php o('+content'); ?&gt;
+&lt;p&gt;
+The default content goes here and can be replaced in a child template that 
+extends this one.
+&lt;/p&gt;
+&lt;?php o('-content'); ?&gt;
+&lt;/div&gt;
+
+&lt;div class="footer"&gt;
+&lt;?php o('+footer'); ?&gt;
+&lt;hr /&gt;
+&lt;small&gt;&amp;copy; 2016 Default Footer Content&lt;/small&gt;
+&lt;?php o('-footer'); ?&gt;
+&lt;/div&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<hr>
+
+<h4>
+<a id="2-extending-a-base-template" class="anchor" href="#2-extending-a-base-template" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>2. Extending a base template...</h4>
+
+<p>To extend another template, at the very top, do: <code>&lt;?php o('::base.html.php') ?&gt;</code> 
+<em>See example of block definitions below.</em></p>
+
+<pre><code>&lt;?php /* ==============  ./hello.html.php  ============ */ ?&gt;
+
+&lt;?php o('::base.html.php');  ?&gt;
+
+&lt;?php o('+header'); ?&gt;
+&lt;h2&gt;Pimp My Header&lt;/h2&gt;
+&lt;?php o('-header'); ?&gt;
+
+&lt;?php o('+content'); ?&gt;
+&lt;p&gt;
+To override the default +content block, create one in the child template 
+and put whatever youu like in the new block!
+&lt;/p&gt;
+&lt;?php o('-content'); ?&gt;
+
+&lt;?php o('+footer'); ?&gt;
+&lt;hr /&gt;
+&lt;small&gt;&amp;copy; 2020 &lt;i&gt;Hmm, upgrades.&lt;/i&gt;&lt;/small&gt;
+&lt;?php o('-footer'); ?&gt;
+
+</code></pre>
+
+<hr>
+
+<h4>
+<a id="3-template-partials" class="anchor" href="#3-template-partials" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>3. Template partials...</h4>
+
+<p>To include a template partial, do: <code>&lt;?php o(':partial.html.php') ?&gt;</code> 
+<em>See example of partial include below (note the difference between the syntax for ::exending and :including)</em></p>
+
+<pre><code>&lt;?php /* ==============  ./hello.html.php  ============ */ ?&gt;
+
+&lt;?php o('::base.html.php');  ?&gt;
+
+&lt;?php o('+header'); ?&gt;
+&lt;?php o(':header.html.php'); ?&gt;
+&lt;?php o('-header'); ?&gt;
+
+&lt;?php o('+content'); ?&gt;
+&lt;p&gt;Content body here.&lt;/p&gt;
+&lt;?php o('-content'); ?&gt;
+
+&lt;?php o('+footer'); ?&gt;
+&lt;?php o(':footer.html.php'); ?&gt;
+&lt;?php o('-footer'); ?&gt;
+
+</code></pre>
+
+<hr>
+
+<h4>
+<a id="4-template-variables" class="anchor" href="#4-template-variables" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>4. Template variables...</h4>
+
+<p>You can define your template variables in an associative <code>array[]</code> like this:</p>
+
+<pre><code>&lt;?php 
+
+/* ============== ./index.php =================== */ 
+// Include `Olov\Engine` class (or use composer autoloader)
+require '../path/to/olov/src/Olov/Engine.php';
+
+// Declare vars...
+$vars = [
+    'page' =&gt; [
+        'title' =&gt; 'Olov Template Engine for PHP', 
+        'body'  =&gt;  'Values are automatically &lt;b&gt;escaped&lt;/b&gt; when used the template.', 
+        'tags'  =&gt; [
+            'php', 'template engine', 'olov'
+        ]
+    ];
+</code></pre>
+
+<p><strong>Then create Olov engine instance and render:</strong></p>
+
+<pre><code>// Our templates folder...
+$templates_path = "./my/templates/folder/":
+
+// New instance of `Olov\Engine`
+$Olov = new Olov\Engine($templates_path);
+
+// Render...
+$Olov-&gt;render('hello.html.php', $vars);
+
+?&gt;
+
+
+</code></pre>
+
+<p><strong>Our template: ./hello.html.php</strong></p>
+
+<pre><code>&lt;?php /* ==============  ./hello.html.php  ============ */ ?&gt;
+
+&lt;?php o('::base.html.php');  ?&gt;
+
+&lt;?php o('+header'); ?&gt;
+&lt;h2&gt;&lt;?= o('page.title') ?&gt;&lt;/h2&gt;
+&lt;?php o('-header'); ?&gt;
+
+&lt;?php o('+content'); ?&gt;
+
+&lt;p&gt;
+&lt;?= o('page.body') ?&gt;
+&lt;/p&gt;
+
+&lt;p&gt;&lt;small&gt;Character count: &lt;?= o('page.body|length') ?&gt;&lt;/small&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;?php o('page.tags|each:i,li'); ?&gt;
+&lt;/ul&gt;
+
+&lt;?php o('-content'); ?&gt;
+
+&lt;?php o('+footer'); ?&gt;
+&lt;hr /&gt;
+&lt;small&gt;&amp;copy; 2020 &lt;i&gt;Hmm, upgrades.&lt;/i&gt;&lt;/small&gt;
+&lt;?php o('-footer'); ?&gt;
+
+</code></pre>
+
+<hr>
+
+<h4>
+<a id="5-loops" class="anchor" href="#5-loops" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>5. Loops</h4>
+
+<p>You can automatically print array values by doing: </p>
+
+<pre><code>&lt;ul&gt;
+&lt;?php o('page.tags|each'); ?&gt;
+&lt;/ul&gt;
+</code></pre>
+
+<p>This will output:</p>
+
+<ul>
+<li>php</li>
+<li>template engine</li>
+<li>olov</li>
+</ul>
+
+<p>Olov wraps your array values with the <code>&lt;li&gt;</code> by default and auto escapes the text values. 
+Olov can also wrap your loop items in multiple concentric layers of tags. For eaxample:</p>
+
+<pre><code>&lt;?php o('page.tags|each:b,a,li'); ?&gt;
+</code></pre>
+
+<p>Outputs:</p>
+
+<pre><code>&lt;li&gt;&lt;a&gt;&lt;b&gt;Text Value&lt;/b&gt;&lt;/a&gt;&lt;/li&gt;
+</code></pre>
+
+<p>To set tag properties and attributes, define your list in your <code>$vars</code> array like this:</p>
+
+<pre><code>$vars = [
+    // ....
+    'users' =&gt; [
+        ['Jamie Foxx', 'a:href'=&gt;'https://en.wikipedia.org/wiki/Jamie_Foxx', 'li:class'=&gt;'name'],   
+        ['Marlon Brando', 'a:href'=&gt;'https://en.wikipedia.org/wiki/Marlon_Brando', 'li:class'=&gt;'name'],   
+        ['Thandie Newton', 'a:href'=&gt;'https://en.wikipedia.org/wiki/Thandie_Newton', 'li:class'=&gt;'name']
+    ]
+];
+</code></pre>
+
+<p>Then...</p>
+
+<pre><code>&lt;ul class="hollywood-actors"&gt;
+&lt;?php o('page.tags|each:a,li'); ?&gt;
+&lt;/ul&gt;
+</code></pre>
+
+<p>Throw in the blender and ...</p>
+
+<pre><code>&lt;ul class="hollywood-actors"&gt;
+&lt;li class="name"&gt;&lt;a href="https://en.wikipedia.org/wiki/Jamie_Foxx"&gt;Jamie Foxx&lt;/a&gt;&lt;/li&gt;
+&lt;li class="name"&gt;&lt;a href="https://en.wikipedia.org/wiki/Marlon_Brando"&gt;Marlon Brando&lt;/a&gt;&lt;/li&gt;
+&lt;li class="name"&gt;&lt;a href="https://en.wikipedia.org/wiki/Thandie_Newton"&gt;Thandie Newton&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</code></pre>
+
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Jamie_Foxx">Jamie Foxx</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Marlon_Brando">Marlon Brando</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Thandie_Newton">Jamie Foxx</a></li>
+</ul>
+
+<hr>
+
+<h4>
+<a id="6-installation" class="anchor" href="#6-installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>6. Installation</h4>
+
+<p>You can <a href="https://getcomposer.org/doc/03-cli.md">require</a> with Composer:</p>
+
+<pre><code>$ composer require "olov/olov:~1.0"
+</code></pre>
+
+<p>Or clone this repo with:</p>
+
+<pre><code>$ git clone https://github.com/olovphp/Olov.git
+</code></pre>
+
+<p>Or download the zip folder.</p>
+
+<hr>
+
+<p>This is a quickstart guide not a real documentation (that is on the way.) In the meantime 
+please clone the repo and run <code>examples/index.php</code> to see a live example. I hope you 
+find this useful in your projects and bug reports are most welcome! </p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/olovphp/Olov">Olov</a> is maintained by <a href="https://github.com/olovphp">olovphp</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
