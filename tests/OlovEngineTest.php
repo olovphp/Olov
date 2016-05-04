@@ -1,13 +1,13 @@
 <?php
 
-require_once __DIR__.'/../src/Nano/Engine.php';
+require_once __DIR__.'/../src/Olov/Engine.php';
 
-class NanoEngineTest extends PHPUnit_Framework_TestCase {
+class OlovEngineTest extends PHPUnit_Framework_TestCase {
 
     /**
      * engine
      *
-     * @var \Nano\Engine
+     * @var \Olov\Engine
      */
     private $engine;
 
@@ -22,18 +22,18 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
     {
         $this->vars = [
             'page' => [
-                'title' => 'Welcome to Nano!', 
-                'body' => 'Nano is a micro template <b>engine</b> for PHP.', 
+                'title' => 'Welcome to Olov!', 
+                'body' => 'Olov is a micro template <b>engine</b> for PHP.', 
                 'tags' => [
                     'php',
-                    'nano', 
+                    'olov', 
                     'esca>pe<=me', 
                     'template',
                     'html'
                 ], 
                 'mixed' => [
                     'php', 
-                    'nano', 
+                    'olov', 
                     'esca>pe<=me', 
                     ['template', new DateTime()], 
                     [new DateTime()],
@@ -57,7 +57,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
             ]
         ];
 
-        $this->engine = new Nano\Engine(__DIR__.'/templates');
+        $this->engine = new Olov\Engine(__DIR__.'/templates');
         
     }
 
@@ -158,7 +158,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
             ["?page.title", true], 
 
             // 2: Expect variable content
-            ["page.title", "Welcome to Nano!"], 
+            ["page.title", "Welcome to Olov!"], 
 
             // 3: Expect true if variable's content length < 50 
             ["page.title|less:50", true], 
@@ -179,51 +179,51 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
             ["page.links|length", 7],
 
             // 8: Expect escaped variable content
-            ["page.body", "Nano is a micro template &lt;b&gt;engine&lt;/b&gt; for PHP."],
+            ["page.body", "Olov is a micro template &lt;b&gt;engine&lt;/b&gt; for PHP."],
 
             // 9: Expect raw variable content
-            ["page.body*", "Nano is a micro template <b>engine</b> for PHP."], 
+            ["page.body*", "Olov is a micro template <b>engine</b> for PHP."], 
 
             // 10: Expect escaped variable content (* turns it off, esc turns it back on -- zero sum)
-            ["page.body|esc*", "Nano is a micro template &lt;b&gt;engine&lt;/b&gt; for PHP."],
+            ["page.body|esc*", "Olov is a micro template &lt;b&gt;engine&lt;/b&gt; for PHP."],
 
             // 11: Expect escaped array variable values
-            ["page.tags", ['php','nano', 'esca&gt;pe&lt;=me', 'template', 'html']],
+            ["page.tags", ['php','olov', 'esca&gt;pe&lt;=me', 'template', 'html']],
 
             // 12: Expect raw array variable values
-            ["page.tags*", ['php','nano', 'esca>pe<=me', 'template', 'html']],
+            ["page.tags*", ['php','olov', 'esca>pe<=me', 'template', 'html']],
 
-            // 13: Expect Nano to echo array content with each entry wrapped in <li>
+            // 13: Expect Olov to echo array content with each entry wrapped in <li>
             ["page.tags|each", array_reduce(
-                ['php', 'nano', 'esca>pe<=me', 'template', 'html'],
+                ['php', 'olov', 'esca>pe<=me', 'template', 'html'],
                 function ($str, $v) {
                     $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
                     return "$str<li>$v</li>\n";
                 }, "")
             ], 
 
-            // 14: Expect Nano to echo array content with each entry wrapped in <div>
+            // 14: Expect Olov to echo array content with each entry wrapped in <div>
             ["page.tags|each:div", array_reduce(
-                ['php', 'nano', 'esca>pe<=me', 'template', 'html'],
+                ['php', 'olov', 'esca>pe<=me', 'template', 'html'],
                 function ($str, $v) {
                     $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
                     return "$str<div>$v</div>\n";
                 }, "")
             ] , 
 
-            // 15: Expect Nano to echo array content with each entry wrapped in <li><a><b> --- </b></a></li>
+            // 15: Expect Olov to echo array content with each entry wrapped in <li><a><b> --- </b></a></li>
             ["page.tags|each:b,a,li", array_reduce(
-                ['php', 'nano', 'esca>pe<=me', 'template', 'html'],
+                ['php', 'olov', 'esca>pe<=me', 'template', 'html'],
                 function ($str, $v) {
                     $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
                     return "$str<li><a><b>$v</b></a></li>\n";
                 }, "")
             ], 
 
-            // 16: Expect Nano to echo array content with each entry wrapped in <li><a><b> --- </b></a></li>
+            // 16: Expect Olov to echo array content with each entry wrapped in <li><a><b> --- </b></a></li>
             //     and handle invalid entries like objects by printing their type instead ("object").
             ["page.mixed|each:b,a,li", array_reduce(
-                ['php', 'nano', 'esca>pe<=me', ['template', 'object'], ['object'], 'object'],
+                ['php', 'olov', 'esca>pe<=me', ['template', 'object'], ['object'], 'object'],
                 function ($str, $v) {
                     if (!is_string($v) && !is_numeric($v) && !is_array($v)) return $str;
                     if (is_array($v)) {
@@ -236,7 +236,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
                 }, "")
             ], 
 
-            // 17: Expect Nano to echo array content with each entry wrapped in <li><a> --- </a></li>
+            // 17: Expect Olov to echo array content with each entry wrapped in <li><a> --- </a></li>
             //     with mapped tag properties rendered correctly.
             [
                 "page.links|each:a,li",
@@ -249,7 +249,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
                 '<li class="item"><a href="http://pinterest.com">Pinterest</a></li>' . "\n"
             ], 
 
-            // 18: Expect Nano to handle self-closing tags (ex: <li><input> --- </li>)
+            // 18: Expect Olov to handle self-closing tags (ex: <li><input> --- </li>)
             [
                 "page.todos|each:input,li",
                 '<li><input type="radio" name="dev" value="Grace Hunag" />Grace Huang</li>' . "\n" . 
@@ -282,7 +282,7 @@ class NanoEngineTest extends PHPUnit_Framework_TestCase {
     {
         return [
             ["page.tags|each:ul", array_reduce(
-                ['php', 'nano', 'esca>pe<=me', 'template', 'html'],
+                ['php', 'olov', 'esca>pe<=me', 'template', 'html'],
                 function ($str, $v) {
                     $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
                     return "$str<li>$v</li>\n";
