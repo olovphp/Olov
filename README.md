@@ -10,7 +10,7 @@ like this ` <?php o('-blockname') ?> `.
 
 *Example of block definitions:*
 
-```
+```php
 <?php /* ============  ./base.html.php ===============  */ ?>
 <!DOCTYPE html>
 <html>
@@ -49,7 +49,7 @@ extends this one.
 To extend another template, at the very top, do: ` <?php o('::base.html.php') ?> ` 
 *See example of block definitions below.*
 
-```
+```php
 <?php /* ==============  ./hello.html.php  ============ */ ?>
 
 <?php o('::base.html.php');  ?>
@@ -79,7 +79,7 @@ and put whatever youu like in the new block!
 To include a template partial, do: ` <?php o(':partial.html.php') ?> ` 
 *See example of partial include below (note the difference between the syntax for ::exending and :including)*
 
-```
+```php
 <?php /* ==============  ./hello.html.php  ============ */ ?>
 
 <?php o('::base.html.php');  ?>
@@ -104,7 +104,7 @@ To include a template partial, do: ` <?php o(':partial.html.php') ?> `
 
 You can define your template variables in an associative ` array[] ` like this:
 
-```
+```php
 <?php 
 
 /* ============== ./index.php =================== */ 
@@ -123,7 +123,7 @@ $vars = [
 ```
 
 **Then create Olov engine instance and render:**
-```
+```php
 // Our templates folder...
 $templates_path = "./my/templates/folder/":
 
@@ -140,7 +140,7 @@ $Olov->render('hello.html.php', $vars);
 
 **Our template: ./hello.html.php**
 
-```
+```php
 <?php /* ==============  ./hello.html.php  ============ */ ?>
 
 <?php o('::base.html.php');  ?>
@@ -175,7 +175,7 @@ $Olov->render('hello.html.php', $vars);
 #### 5. Loops ####
 
 You can automatically print array values by doing: 
-``` 
+```php 
 <ul>
 <?php o('page.tags|each'); ?>
 </ul>
@@ -190,17 +190,17 @@ This will output:
 
 Olov wraps your array values with the ` <li> ` by default and auto escapes the text values. 
 Olov can also wrap your loop items in multiple concentric layers of tags. For eaxample:
-```
+```php
 <?php o('page.tags|each:b,a,li'); ?>
 ```
 Outputs:
-```
+```html
 <li><a><b>Text Value</b></a></li>
 ```
 
 
 To set tag properties and attributes, define your list in your ` $vars ` array like this:
-```
+```php
 $vars = [
     // ....
     'users' => [
@@ -211,13 +211,13 @@ $vars = [
 ];
 ```
 Then...
-```
+```php
 <ul class="hollywood-actors">
 <?php o('page.tags|each:a,li'); ?>
 </ul>
 ```
 Throw in the blender and ...
-```
+```html
 <ul class="hollywood-actors">
 <li class="name"><a href="https://en.wikipedia.org/wiki/Jamie_Foxx">Jamie Foxx</a></li>
 <li class="name"><a href="https://en.wikipedia.org/wiki/Marlon_Brando">Marlon Brando</a></li>
@@ -233,12 +233,12 @@ Throw in the blender and ...
 #### 6. Installation ####
 
 You can [require](https://getcomposer.org/doc/03-cli.md) with Composer:
-```
+```shell
 $ composer require "olov/olov:~1.0"
 ```
  
 Or clone this repo with:
-```
+```shell
 $ git clone https://github.com/olovphp/Olov.git
 ```
 
