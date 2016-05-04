@@ -1,22 +1,22 @@
 <?php
 /**
- * Nano Template Engine (https://github.com/gboyega/nano)
+ * Olov PHP Template Engine (https://github.com/olovphp/Olov)
  *
- * @link      https://github.com/gboyega/nano
+ * @link      https://github.com/olovphp/Olov
  * @copyright Copyright (c) 2016 Gboyega Dada
- * @license   https://github.com/gboyega/nano/blob/master/gpl-3.0.txt (GPLv3 License)
+ * @license   https://github.com/olovphp/Olov/blob/master/gpl-3.0.txt (GPLv3 License)
  */
 
-namespace Nano;
+namespace Olov;
 
-use Nano\Engine;
+use Olov\Engine;
 use RuntimeException;
 use BadMethodCallException;
 use InvalidArgumentException;
 use Closure;
 
 /**
- * Nano template engine.
+ * Olov PHP template engine.
  *
  * @author Gboyega Dada <gboyega@fpplabs.com>
  * @version 1.0

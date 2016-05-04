@@ -1,8 +1,8 @@
 {
-    "name": "nano/nano",
-    "description": "Nano is a micro template engine for PHP.",
-    "keywords": ["template engine", "native"],
-    "homepage": "http://nano.fpplabs.io",
+    "name": "olov/olov",
+    "description": "Olov is a micro template engine for PHP.",
+    "keywords": ["olov", "o", "template engine", "native", "php templates"],
+    "homepage": "http://gboyega.github.io/olovphp",
     "type": "library",
     "license": "GPL-3.0+",
     "authors": [
@@ -19,6 +19,6 @@
         "phpunit/phpunit": "5.3.*"
     },
     "autoload": {
-        "psr-0": { "Nano": "src/" }
+        "psr-0": { "Olov": "src/" }
     }
 }

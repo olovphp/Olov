@@ -1,10 +1,10 @@
 <?php
 /**
- * Nano Template Engine (https://github.com/gboyega/nano)
+ * Olov Template Engine (https://github.com/olovphp/Olov)
  *
- * @link      https://github.com/gboyega/nano
+ * @link      https://github.com/olovphp/Olov
  * @copyright Copyright (c) 2016 Gboyega Dada
- * @license   https://github.com/gboyega/nano/blob/master/gpl-3.0.txt (GPLv3 License)
+ * @license   https://github.com/olovphp/Olov/blob/master/gpl-3.0.txt (GPLv3 License)
  * @author Gboyega Dada <gboyega@fpplabs.com>
  * @version 1.0
  */
@@ -18,7 +18,7 @@ if (!function_exists('o')) {
      * this class from inside our template files.
      *
      * @param string $query
-     * @param \Cataleya\Apps\Nano\Engine $engine
+     * @param \Olov\Engine $engine
      * @access public
      * @return mixed
      */
@@ -39,7 +39,7 @@ if (!function_exists('o')) {
 /**
  * Init o function.
  *
- * Here we will inject the Nano\Engine instance into our function.
+ * Here we will inject the Olov\Engine instance into our function.
  *
  * Note that this sets the engine instance used in the fn every time 
  * a template file is included. It is safer that way since this function will 
@@ -50,7 +50,7 @@ if (!function_exists('o')) {
  * so this $__engine__ instance remains relatively isolated.
  *
  * @param null
- * @param \Cataleya\Apps\Nano\Engine $__engine__
+ * @param \Olov\Engine $__engine__
  */
 o(null, $__engine__);
 

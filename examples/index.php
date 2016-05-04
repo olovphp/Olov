@@ -1,11 +1,11 @@
 <?php
 
-require_once __DIR__.'/../src/Nano/Engine.php';
+require_once __DIR__.'/../src/Olov/Engine.php';
 
 $vars = [
     'page' => [
-        'title' => 'Welcome to Nano', 
-        'body' => 'Nano is a micro template <b><u>engine</u></b> for PHP.',
+        'title' => 'Welcome to Olov', 
+        'body' => 'Olov is a micro template <b><u>engine</u></b> for PHP.',
         'devs' => [
             [
                 'name'=>'Lanre Onabanjo <script>alert("I am malificient");</script>', 
@@ -35,6 +35,6 @@ $vars = [
     ]
 ];
 
-$n = new Nano\Engine(__DIR__);
+$n = new Olov\Engine(__DIR__);
 
 echo $n->render('hello-again.html.php', $vars);
