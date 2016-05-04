@@ -120,7 +120,10 @@ $vars = [
             'php', 'template engine', 'olov'
         ]
     ];
+```
 
+**Then create Olov engine instance and render:**
+```
 // Our templates folder...
 $templates_path = "./my/templates/folder/":
 
@@ -135,7 +138,7 @@ $Olov->render('hello.html.php', $vars);
 
 ```
 
-#### Then... ####
+**Our template: ./hello.html.php**
 
 ```
 <?php /* ==============  ./hello.html.php  ============ */ ?>
@@ -185,8 +188,8 @@ This will output:
 * olov
 
 
-Olov wraps your array values with the ` <li> ` and auto escapes the text values. 
-Olov can also wrap your list items in multiples concentric layers. For eaxample:
+Olov wraps your array values with the ` <li> ` by default and auto escapes the text values. 
+Olov can also wrap your loop items in multiple concentric layers of tags. For eaxample:
 ```
 <?php o('page.tags|each:b,a,li'); ?>
 ```
@@ -194,6 +197,7 @@ Outputs:
 ```
 <li><a><b>Text Value</b></a></li>
 ```
+
 
 To set tag properties and attributes, define your list in your ` $vars ` array like this:
 ```
@@ -224,9 +228,28 @@ Throw in the blender and ...
 * [Marlon Brando](https://en.wikipedia.org/wiki/Marlon_Brando)
 * [Jamie Foxx](https://en.wikipedia.org/wiki/Thandie_Newton)
 
+-----------------------------------------------------------------------
+
+#### 6. Installation ####
+
+You can [require](https://getcomposer.org/doc/03-cli.md) with Composer:
+```
+$ composer require "olov/olov:~1.0"
+```
+ 
+Or clone this repo with:
+```
+$ git clone https://github.com/olovphp/Olov.git
+```
+
+Or download the zip folder.
+
+
+
 --------------------------------------------------------------------------
 
-This is a quickstart guide not a real documentation; that is on the way. In the meantime 
+
+This is a quickstart guide not a real documentation (that is on the way.) In the meantime 
 please clone the repo and run ` examples/index.php ` to see a live example. I hope you 
-find this useful for your projects and bug reports are most welcome! 
+find this useful in your projects and bug reports are most welcome! 
 
