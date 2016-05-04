@@ -1,8 +1,8 @@
 {
     "name": "olov/olov",
-    "description": "Olov is a micro template engine for PHP.",
-    "keywords": ["olov", "o", "template engine", "native", "php templates"],
-    "homepage": "http://gboyega.github.io/olovphp",
+    "description": "Olov is a micro templating engine for PHP.",
+    "keywords": ["templating", "php templates"],
+    "homepage": "http://olovphp.github.io/Olov",
     "type": "library",
     "license": "GPL-3.0+",
     "authors": [
