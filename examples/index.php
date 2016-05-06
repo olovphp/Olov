@@ -35,6 +35,6 @@ $vars = [
     ]
 ];
 
-$n = new Olov\Engine(__DIR__);
+$n = Olov::o(__DIR__);
 
 echo $n->render('hello-again.html.php', $vars);

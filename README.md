@@ -127,11 +127,11 @@ $vars = [
 // Our templates folder...
 $templates_path = "./my/templates/folder/":
 
-// New instance of `Olov\Engine`
-$Olov = new Olov\Engine($templates_path);
+// New instance of Olov 
+$o = Olov::o($templates_path);
 
 // Render...
-$Olov->render('hello.html.php', $vars);
+$o->render('hello.html.php', $vars);
 
 ?>
 
@@ -226,7 +226,7 @@ Throw in the blender and ...
 ```   
 * [Jamie Foxx](https://en.wikipedia.org/wiki/Jamie_Foxx)
 * [Marlon Brando](https://en.wikipedia.org/wiki/Marlon_Brando)
-* [Jamie Foxx](https://en.wikipedia.org/wiki/Thandie_Newton)
+* [Thandie Newton](https://en.wikipedia.org/wiki/Thandie_Newton)
 
 -----------------------------------------------------------------------
 
