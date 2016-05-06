@@ -10,6 +10,7 @@
 namespace Olov;
 
 use Olov\Engine;
+use Olov\Encoder;
 use RuntimeException;
 use BadMethodCallException;
 use InvalidArgumentException;
@@ -19,7 +20,7 @@ use Closure;
  * Olov PHP template engine.
  *
  * @author Gboyega Dada <gboyega@fpplabs.com>
- * @version 1.0
+ * @version 0.1.0
  */
 class Engine {
 
@@ -32,14 +33,32 @@ class Engine {
      *
      * @var bool
      */
-    private $debug = false;
+    protected $debug;
 
     /**
-     * base_path
+     * charset
      *
-     * @var mixed
+     * @var string
      */
-    protected $base_path = null;
+    protected $charset;
+
+    /**
+     * autoescape
+     *
+     * @var string
+     */
+    protected $autoescape;
+
+    /**
+     * path
+     *
+     * An array containing default base paths to look for a 
+     * template file so we don't have to use path names in :include or 
+     * ::extend.
+     *
+     * @var string[]
+     */
+    protected $path = [];
 
     /**
      * parent
@@ -138,19 +157,30 @@ class Engine {
      *
      * @return void
      */
-    public function __construct($base_path = "") 
+    public function __construct($path = [], array $options = []) 
     {
-        if (!empty($base_path) && !file_exists($base_path)) {
 
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Invalid argument (1): valid folder path required. ' . 
-                    'Please check path - "%s"', $base_path
-                )
-            );
-        }
+        /* Base Path(s) */
 
-        $this->base_path = is_string($base_path) ? $base_path : "";
+        $this->setPath($path);
+
+        /* Default Options */
+
+        $options = array_merge(
+            [
+            'debug'               => false,
+            'charset'             => 'UTF-8',
+            'autoescape'          => 'html',
+            ],
+            $options
+        );
+
+        $this->debug = (bool) $options['debug'];
+        $this->charset = strtoupper(trim($options['charset']));
+        $this->autoescape = strtolower($options['autoescape']);
+
+        $this->encoder = new Encoder($this->charset);
+
 
         /* Base Filter Functions */
 
@@ -232,14 +262,51 @@ class Engine {
          *  Returns escaped output.  
          *
          *  @param mixed $var
-         *  @param string|null $type    html|js
+         *  @param string|null $context    HTML | ATTR | JS | CSS | URL 
          */
-        $this->filters['esc'] = function ($var = '', $type = 'html') {
-            return is_scalar($var) 
-                ? htmlspecialchars($var, ENT_COMPAT, 'UTF-8') 
-                : array_map(function ($v) { 
-                    return is_scalar($v) ? htmlspecialchars($v, ENT_COMPAT, 'UTF-8') : $v; 
-                }, (array)$var);
+        $this->filters['esc'] = function ($var = '', $context = 'html') {
+            switch(strtolower(trim($context))) {
+            case 'html' : $escFn = [$this->encoder, 'esc_html']; break;
+            case 'attr' : $escFn = [$this->encoder, 'esc_attr']; break;
+            case 'url'  : $escFn = [$this->encoder, 'esc_url']; break;
+            case 'js'   : $escFn = [$this->encoder, 'esc_js']; break;
+            case 'css'  : $escFn = [$this->encoder, 'esc_css']; break;
+            default:
+                throw new InvalidArgumentException(
+                    sprintf('Unknown escape context (%s)', $context)
+                );
+            }
+
+            switch ($type = gettype($var)) {
+            case 'array':
+                $failed = !array_walk_recursive($var, function (&$v, $k) use ($escFn) { 
+                    switch($t = gettype($v)) {
+                        case 'string': $v = call_user_func($escFn, $v); break;
+
+                        case 'boolean':
+                        case 'integer':
+                        case 'float': break;
+
+                        default: $v = $t;
+                    }
+                });
+
+                if ($failed) { 
+                    throw new RuntimeException("Failed to escape template var with array_walk_recursive");
+                }
+                    
+                return $var;
+            case 'string':
+                return call_user_func($escFn, $var);
+
+            case 'boolean':
+            case 'integer':
+            case 'float':
+                return $var;
+
+            default: 
+                return $type;
+            }
         };
 
         /**
@@ -316,7 +383,7 @@ class Engine {
                         foreach ($v as $pk=>$pv) {
 
                             if (preg_match($pattern, (string)$pk, $_)) {
-                                $props[$_[1]][] = $_[2]."=\"$pv\"";
+                                $props[$_[1]][] = $_[2] . "=\"" . $this->encoder->esc_attr($pv) . "\"";
                             } else {
                                 $text = $pv;
                             }
@@ -345,7 +412,7 @@ class Engine {
                     }
 
                     $text = (is_string($text) || is_numeric($text)) ? (string)$text : gettype($text);
-                    return "$html$tgo" . htmlspecialchars($text, ENT_COMPAT, 'UTF-8') . "$tgc\n";
+                    return "$html$tgo" . $this->encoder->esc_html($text) . "$tgc\n";
 
                 }, "");
 
@@ -382,6 +449,387 @@ class Engine {
         }
     }
 
+    /**
+     * parseQuery
+     *
+     * @param mixed $q
+     * @return array
+     */
+    protected function parseQuery($q) 
+    {
+        // match ending for single char operators
+        if (preg_match('/^([a-zA-Z\d\|:,_\+\-\.\s]+)(\?|!|\*)$/', $q, $_)) {
+            switch($_[2]) {
+            case '?': return ['type'=>'exists', 'name'=>$_[1]];
+            case '*': 
+                $var = explode('|', $_[1]);
+                return [
+                    'type'=>'variable', 
+                    'name'=>array_shift($var), 
+                    'filters'=>array_unique($var)
+                ];
+            }
+        }
+
+        if (preg_match('/^[a-zA-Z]/', $q)) {
+            // assume it's a variable
+            $var = explode('|', $q);
+            $name = array_shift($var);
+            if (
+                $this->autoescape && 
+                strpos($q, '|each') === false &&   
+                strpos($q, '|esc') === false
+            ) array_unshift($var, 'esc:'.$this->autoescape); // add escape filter
+
+            return [
+                'type'=>'variable', 
+                'name'=>$name, 
+                'filters'=>$var
+            ];
+        }
+
+        // match 2 char operators first
+        switch(substr($q,0,2)) {
+        case '::': return ['type'=>'extend', 'name'=>substr($q,2)];
+        }
+
+        // match beginning for single char operators
+        switch($q[0]) {
+        case '?': return ['type'=>'exists', 'name'=>substr($q,1)];
+        case '!': return ['type'=>'not_set', 'name'=>substr($q,1)];
+        case '+': return ['type'=>'block_start', 'name'=>substr($q,1)];
+        case '-': return ['type'=>'block_end', 'name'=>substr($q,1)];
+        case '|': return ['type'=>'fn', 'name'=>substr($q,1)];
+        case ':': return ['type'=>'partial', 'file'=>substr($q,1)];
+        }
+
+        throw new RuntimeException(
+            sprintf('Unable to resolve query string "%s". Typo?', $q)
+        );
+    }
+
+
+
+    /* -------------- HELPERS ------------------------ */
+
+    /**
+     * hasVar
+     *
+     * @param string $name  Dot key.
+     * @return bool
+     */
+    public function hasVar($name) 
+    {
+        $a = $this->vars;
+
+        if (empty($a)) { return false; }
+        if (array_key_exists($name, $a)) { return true; }
+        
+        foreach (explode('.', $name) as $k) 
+        {
+            if (!is_array($a) || !array_key_exists($k, $a)) 
+            {
+                return false;
+            }
+            
+            $a = $a[$k];
+        }
+        
+        return true;
+    }
+
+    /**
+     * getVar
+     *
+     * Get var from mutidim array with dot key.
+     *
+     * @param string $name   Dot key.
+     * @return mixed
+     */
+    public function getVar($n) 
+    {
+        $a = $this->vars;
+
+        if (array_key_exists($n, $a)) { return $a[$n]; }
+        
+        foreach (explode('.', $n) as $k) 
+        {
+            if (!is_array($a) || !array_key_exists($k, $a)) 
+            {
+                $a = null; break;
+            }
+            
+            $a = $a[$k];
+        }
+
+        if ($a === null) {
+            throw new RuntimeException(
+                sprintf('Template variable %s not found.', $n)
+            );
+        }
+        return $a;
+
+    }
+
+    /**
+     * hasFilter
+     *
+     * @param mixed $name
+     * @return bool
+     */
+    public function hasFilter($name)
+    {
+        return isset($this->filters[$name]);
+    }
+
+    /**
+     * applyFilter
+     *
+     * @param mixed $name
+     * @return void
+     */
+    protected function applyFilters(array $filters, $val=null)
+    {
+        foreach ($filters as $f) {
+            $val = $this->applyFilter($f, $val);
+        }
+
+        return $val;    
+    }
+
+    /**
+     * applyFilter
+     *
+     * @param mixed $name
+     * @return mixed
+     */
+    protected function applyFilter($filter, $val=null)
+    {
+        $f = preg_split('/\s*:\s*/', $filter);
+        if (!isset($this->filters[$f[0]])) {
+            throw new RuntimeException(
+                sprintf('Filter "|%s" not found. Typo? Registered?', $f[0])
+            );
+        }
+
+        $args = empty($val) ? [] : [$val];
+        if (isset($f[1])) {
+            $args = array_merge($args, preg_split('/\s*,\s*/', $f[1]));
+        }
+
+        return call_user_func_array($this->filters[$f[0]], $args);
+    }
+
+    /**
+     * hasParent
+     *
+     * @return bool
+     */
+    protected function hasParent() 
+    {
+        return !empty($this->parents_stack);
+    }
+
+    /**
+     * getParent
+     *
+     * @return string
+     */
+    protected function getParent($pop=false)
+    {
+        return $this->hasParent() 
+            ? ($pop ? array_pop($this->parents_stack) : end($this->parents_stack)) 
+            : null;
+    }
+
+    /**
+     * hasChild
+     *
+     * @return bool
+     */
+    protected function hasChild() 
+    {
+        return !empty($this->child);
+    }
+
+    /**
+     * getChild
+     *
+     * @return string
+     */
+    protected function getChild()
+    {
+        return $this->hasChild() 
+            ? $this->child 
+            : null;
+    }
+
+    /**
+     * parseBlock
+     *
+     * @param mixed $block
+     * @return string
+     */
+    protected function parseBlock($block) 
+    {
+        return !is_array($block) 
+            ? $block 
+            : array_reduce($block, function ($buffer, $v) {
+                return $buffer . ($v instanceOf Closure ? (string)$v() : $v);
+            }, "");
+    }
+
+    /**
+     * hasBlock
+     *
+     * @param string $name
+     * @param string        Template filename (not always full path)
+     * @return bool
+     */
+    protected function hasBlock($name, $filename=null) 
+    {
+        $fname = empty($filename) ? $this->name : $filename;
+
+        return (
+            isset($this->blocks[$filename]) && 
+            isset($this->blocks[$filename][$name])
+        );
+    }
+
+    /**
+     * getBlock
+     *
+     * @param mixed $name   If no block name is provided, use 
+     *                      current block name.
+     * @param string        Template filename (not always full path)
+     * @return void
+     */
+    protected function getBlock($name=null, $filename=null, $finalize=false) 
+    {
+        if ($name === null && $this->block_is_open === false) {
+            throw new RuntimeException(
+                'Missing argument (1): block name.'
+            );
+        }
+
+        $name = empty($name) ? $this->block_is_open : $name;
+        $fname = empty($filename) ? $this->name : $filename;
+
+        if (!$this->hasBlock($name, $fname)) {
+            throw new RuntimeException(sprintf('"+%s" block not found in "%s".', $name, $fname));
+        }
+
+
+        return $finalize  
+            ? $this->parseBlock($this->blocks[$filename][$name]) 
+            : $this->blocks[$filename][$name];
+    }
+
+    /**
+     * resetBlock
+     *
+     * @param mixed $name
+     * @param string        Template filename (not always full path)
+     * @return void
+     */
+    protected function resetBlock($name=null, $filename=null) 
+    {
+        if ($name === null && $this->block_is_open === false) {
+            throw new RuntimeException(
+                'Missing argument (1): block name.'
+            );
+        }
+
+        $name = empty($name) ? $this->block_is_open : $name;
+        $fname = empty($filename) ? $this->name : $filename;
+
+        if (!$this->hasBlock($name, $fname)) {
+            return $this;
+        }
+
+        if (!isset($this->blocks[$fname])) {
+            $this->blocks[$fname] = [ $name => [] ];
+        } else {
+            $this->blocks[$fname][$name] = [];
+        }
+
+        return $this;
+    }
+
+    /**
+     * writeBlock
+     *
+     * @param string $name
+     * @param string|Closure $data  This is either string data or a Closure 
+     *                              that returns a name to be used to fetch
+     *                              a parent block later.
+     * @param string        Template filename (not always full path)
+     * @return bool
+     */
+    protected function writeBlock($name, $data, $filename = null) 
+    {
+        if ($this->block_is_open === false || $this->block_is_open !== $name) {
+            throw new RuntimeException(
+                sprintf('Cannot write to block "+%s". It is already closed or wasn\'t opened; typo?', $name)
+            );
+        }
+
+        $fname = empty($filename) ? $this->name : $filename;
+
+        if (!isset($this->blocks[$fname])) {
+            $this->blocks[$fname] = [ $name => [] ];
+        }
+        else if (!isset($this->blocks[$fname][$name])) {
+            $this->blocks[$fname][$name] = [];
+        }
+
+
+        if ($data instanceOf Closure) {
+            $data->bindTo($this);
+        } 
+
+        $this->blocks[$fname][$name] = array_merge($this->blocks[$fname][$name], (array)$data);
+        
+
+        return $this;
+
+    }
+
+    /**
+     * setBlock
+     *
+     * @param string $name  Set instead of append.
+     * @param string|Closure $data  This is either string data or a Closure 
+     *                              that returns a name to be used to fetch
+     *                              a parent block later.
+     * @param string        Template filename (not always full path)
+     * @return bool
+     */
+    protected function setBlock($name, $data, $filename = null) 
+    {
+        if ($this->block_is_open === false || $this->block_is_open !== $name) {
+            throw new RuntimeException(
+                sprintf('Cannot write to block "+%s". It is already closed or wasn\'t opened; typo?', $name)
+            );
+        }
+
+        $fname = empty($filename) ? $this->name : $filename;
+
+        if (!isset($this->blocks[$fname])) {
+            $this->blocks[$fname] = [ $name => [] ];
+        }
+
+
+        if ($data instanceOf Closure) {
+            $data->bindTo($this);
+        } 
+
+        $this->blocks[$fname][$name] = (array)$data;
+        
+
+        return $this;
+
+    }
 
     /* -------------- HANDLERS ----------------------- */
 
@@ -614,415 +1062,37 @@ class Engine {
 
     }
 
-
-    /* -------------- HELPERS ------------------------ */
-
-    /**
-     * hasVar
-     *
-     * @param string $name  Dot key.
-     * @return bool
-     */
-    protected function hasVar($name) 
-    {
-        $a = $this->vars;
-
-        if (empty($a)) { return false; }
-        if (array_key_exists($name, $a)) { return true; }
-        
-        foreach (explode('.', $name) as $k) 
-        {
-            if (!is_array($a) || !array_key_exists($k, $a)) 
-            {
-                return false;
-            }
-            
-            $a = $a[$k];
-        }
-        
-        return true;
-    }
-
-    /**
-     * getVar
-     *
-     * Get var from mutidim array with dot key.
-     *
-     * @param string $name   Dot key.
-     * @return mixed
-     */
-    public function getVar($n) 
-    {
-        $a = $this->vars;
-
-        if (array_key_exists($n, $a)) { return $a[$n]; }
-        
-        foreach (explode('.', $n) as $k) 
-        {
-            if (!is_array($a) || !array_key_exists($k, $a)) 
-            {
-                $a = null; break;
-            }
-            
-            $a = $a[$k];
-        }
-
-        if ($a === null) {
-            throw new RuntimeException(
-                sprintf('Template variable %s not found.', $n)
-            );
-        }
-        return $a;
-
-    }
-
-    /**
-     * hasParent
-     *
-     * @return bool
-     */
-    protected function hasParent() 
-    {
-        return !empty($this->parents_stack);
-    }
-
-    /**
-     * getParent
-     *
-     * @return string
-     */
-    protected function getParent($pop=false)
-    {
-        return $this->hasParent() 
-            ? ($pop ? array_pop($this->parents_stack) : end($this->parents_stack)) 
-            : null;
-    }
-
-    /**
-     * hasChild
-     *
-     * @return bool
-     */
-    protected function hasChild() 
-    {
-        return !empty($this->child);
-    }
-
-    /**
-     * getChild
-     *
-     * @return string
-     */
-    protected function getChild()
-    {
-        return $this->hasChild() 
-            ? $this->child 
-            : null;
-    }
-
-    /**
-     * parseBlock
-     *
-     * @param mixed $block
-     * @return string
-     */
-    protected function parseBlock($block) 
-    {
-        return !is_array($block) 
-            ? $block 
-            : array_reduce($block, function ($buffer, $v) {
-                return $buffer . ($v instanceOf Closure ? (string)$v() : $v);
-            }, "");
-    }
-
-    /**
-     * hasBlock
-     *
-     * @param string $name
-     * @param string        Template filename (not always full path)
-     * @return bool
-     */
-    protected function hasBlock($name, $filename=null) 
-    {
-        $fname = empty($filename) ? $this->name : $filename;
-
-        return (
-            isset($this->blocks[$filename]) && 
-            isset($this->blocks[$filename][$name])
-        );
-    }
-
-    /**
-     * getBlock
-     *
-     * @param mixed $name   If no block name is provided, use 
-     *                      current block name.
-     * @param string        Template filename (not always full path)
-     * @return void
-     */
-    protected function getBlock($name=null, $filename=null, $finalize=false) 
-    {
-        if ($name === null && $this->block_is_open === false) {
-            throw new RuntimeException(
-                'Missing argument (1): block name.'
-            );
-        }
-
-        $name = empty($name) ? $this->block_is_open : $name;
-        $fname = empty($filename) ? $this->name : $filename;
-
-        if (!$this->hasBlock($name, $fname)) {
-            throw new RuntimeException(sprintf('"+%s" block not found in "%s".', $name, $fname));
-        }
-
-
-        return $finalize  
-            ? $this->parseBlock($this->blocks[$filename][$name]) 
-            : $this->blocks[$filename][$name];
-    }
-
-    /**
-     * resetBlock
-     *
-     * @param mixed $name
-     * @param string        Template filename (not always full path)
-     * @return void
-     */
-    protected function resetBlock($name=null, $filename=null) 
-    {
-        if ($name === null && $this->block_is_open === false) {
-            throw new RuntimeException(
-                'Missing argument (1): block name.'
-            );
-        }
-
-        $name = empty($name) ? $this->block_is_open : $name;
-        $fname = empty($filename) ? $this->name : $filename;
-
-        if (!$this->hasBlock($name, $fname)) {
-            return $this;
-        }
-
-        if (!isset($this->blocks[$fname])) {
-            $this->blocks[$fname] = [ $name => [] ];
-        } else {
-            $this->blocks[$fname][$name] = [];
-        }
-
-        return $this;
-    }
-
-    /**
-     * writeBlock
-     *
-     * @param string $name
-     * @param string|Closure $data  This is either string data or a Closure 
-     *                              that returns a name to be used to fetch
-     *                              a parent block later.
-     * @param string        Template filename (not always full path)
-     * @return bool
-     */
-    protected function writeBlock($name, $data, $filename = null) 
-    {
-        if ($this->block_is_open === false || $this->block_is_open !== $name) {
-            throw new RuntimeException(
-                sprintf('Cannot write to block "+%s". It is already closed or wasn\'t opened; typo?', $name)
-            );
-        }
-
-        $fname = empty($filename) ? $this->name : $filename;
-
-        if (!isset($this->blocks[$fname])) {
-            $this->blocks[$fname] = [ $name => [] ];
-        }
-        else if (!isset($this->blocks[$fname][$name])) {
-            $this->blocks[$fname][$name] = [];
-        }
-
-
-        if ($data instanceOf Closure) {
-            $data->bindTo($this);
-        } 
-
-        $this->blocks[$fname][$name] = array_merge($this->blocks[$fname][$name], (array)$data);
-        
-
-        return $this;
-
-    }
-
-    /**
-     * setBlock
-     *
-     * @param string $name  Set instead of append.
-     * @param string|Closure $data  This is either string data or a Closure 
-     *                              that returns a name to be used to fetch
-     *                              a parent block later.
-     * @param string        Template filename (not always full path)
-     * @return bool
-     */
-    protected function setBlock($name, $data, $filename = null) 
-    {
-        if ($this->block_is_open === false || $this->block_is_open !== $name) {
-            throw new RuntimeException(
-                sprintf('Cannot write to block "+%s". It is already closed or wasn\'t opened; typo?', $name)
-            );
-        }
-
-        $fname = empty($filename) ? $this->name : $filename;
-
-        if (!isset($this->blocks[$fname])) {
-            $this->blocks[$fname] = [ $name => [] ];
-        }
-
-
-        if ($data instanceOf Closure) {
-            $data->bindTo($this);
-        } 
-
-        $this->blocks[$fname][$name] = (array)$data;
-        
-
-        return $this;
-
-    }
-    /**
-     * hasFilter
-     *
-     * @param mixed $name
-     * @return bool
-     */
-    protected function hasFilter($name)
-    {
-        return isset($this->filters[$name]);
-    }
-
-    /**
-     * applyFilter
-     *
-     * @param mixed $name
-     * @return void
-     */
-    protected function applyFilters(array $filters, $arg=null)
-    {
-
-        if (empty($filters)) {
-            return $arg;
-        }
-
-        foreach ($filters as $f) {
-            $arg = $this->applyFilter($f, $arg);
-        }
-
-
-        return $arg;    
-    }
-
-    /**
-     * applyFilter
-     *
-     * @param mixed $name
-     * @return mixed
-     */
-    protected function applyFilter($filter, $arg=null)
-    {
-
-        $f = preg_split('/\s*:\s*/', $filter);
-        if (!isset($this->filters[$f[0]])) {
-            throw new RuntimeException(
-                sprintf('Filter "|%s" not found. Typo? Registered?', $f[0])
-            );
-        }
-
-        $args = empty($arg) ? [] : [$arg];
-        if (isset($f[1])) {
-            $args = array_merge($args, preg_split('/\s*,\s*/', $f[1]));
-        }
-
-        return call_user_func_array($this->filters[$f[0]], $args);
-    }
-
-    /**
-     * parseQuery
-     *
-     * @param mixed $q
-     * @return array
-     */
-    protected function parseQuery($q) 
-    {
-        // match ending for single char operators
-        if (preg_match('/^([a-zA-Z\d\|:,_\+\-\.]+)(\?|!|\*)$/', $q, $_)) {
-            switch($_[2]) {
-            case '?': return ['type'=>'exists', 'name'=>$_[1]];
-            case '*': 
-                $var = explode('|', $_[1]);
-                return [
-                    'type'=>'variable', 
-                    'name'=>array_shift($var), 
-                    'filters'=>$var
-                ];
-            }
-        }
-
-        if (preg_match('/^[a-zA-Z]/', $q)) {
-            // assume it's a variable
-            $var = explode('|', $q);
-            $name = array_shift($var);
-            if (!isset($var[0]) || substr($var[0], 0, 4) !== 'each') array_unshift($var, 'esc'); // add escape filter
-            return [
-                'type'=>'variable', 
-                'name'=>$name, 
-                'filters'=>$var
-            ];
-        }
-
-        // match 2 char operators first
-        switch(substr($q,0,2)) {
-        case '::': return ['type'=>'extend', 'name'=>substr($q,2)];
-        }
-
-        // match beginning for single char operators
-        switch($q[0]) {
-        case '?': return ['type'=>'exists', 'name'=>substr($q,1)];
-        case '!': return ['type'=>'not_set', 'name'=>substr($q,1)];
-        case '+': return ['type'=>'block_start', 'name'=>substr($q,1)];
-        case '-': return ['type'=>'block_end', 'name'=>substr($q,1)];
-        case '|': return ['type'=>'fn', 'name'=>substr($q,1)];
-        case ':': return ['type'=>'partial', 'file'=>substr($q,1)];
-        }
-
-        throw new RuntimeException(
-            sprintf('Unable to resolve query string "%s". Typo?', $q)
-        );
-    }
-
-
     /**
      * compile
      *
-     * @param string $__file__
+     * @param string $__template__
      * @return void
      */
-    protected function compile($__file__, $__type__) 
+    protected function compile($__template__, $__type__) 
     {
-        if (!file_exists($__file__)) {
+        if (!file_exists($__template__)) {
+            $found = false;
 
-            $__file__ = (string)$this->base_path . '/' . trim($__file__, '/');
+            foreach ($this->path as $path) {
+                $__file__ = (string)$path . '/' . trim($__template__, '/');
 
-            if (!file_exists($__file__)) {
+                if ($found = file_exists($__file__)) break;
+            }
+
+            if (!$found) {
                 throw new RuntimeException(
-                    sprintf('Can\'t find template file %s. Please check path.', $__file__)
+                    sprintf('Can\'t find template file %s. Please check path.', $__template__)
                 );
             }
         }
 
         // set default path for partials and inheritence.
-        if (empty($this->base_path)) {
-            $this->base_path = pathinfo($__file__, PATHINFO_DIRNAME);
+        if (empty($this->path)) {
+            $this->path = [ pathinfo($__file__, PATHINFO_DIRNAME) ];
         }
 
         if ($__type__ === self::EXTEND || $__type__ === self::RENDER) {
-            $this->filename = $__file__;
+            $this->filename = $__template__;
         } 
 
         
@@ -1096,6 +1166,31 @@ class Engine {
     }
 
     /**
+     * addPath
+     *
+     * @param string $path  Base path for your templates (especially for importing 
+     *                      and extending other templates)
+     * @return static
+     */
+    public function addPath($path) 
+    {
+        if (!is_string($path)) {
+            throw new InvalidArgumentException(
+                sprintf('Invalid argument (1): String required - "%s" given.', gettype($path))
+            );
+        }
+
+        if (!file_exists($path)) {
+            throw new RuntimeException(sprintf('Can\'t find template folder %s. Please check path.', $path));
+        }
+
+        // add default path for partials and inheritence.
+        $this->path[] = is_dir($path) ? $path : pathinfo($path, PATHINFO_DIRNAME);
+
+        return $this;
+
+    }
+    /**
      * setPath
      *
      * @param string $path  Base path for your templates (especially for importing 
@@ -1104,13 +1199,18 @@ class Engine {
      */
     public function setPath($path) 
     {
-        if (!file_exists($path)) {
-            throw new RuntimeException(sprintf('Can\'t find template folder %s. Please check path.', $path));
+        $this->path = [];
+
+        foreach ((array)$path as $p) {
+
+            if (empty($p)) {
+                throw new InvalidArgumentException('Please specify a valid path - empty string given.');
+            }
+
+            $this->addPath($p);
+
         }
-
-        // set default path for partials and inheritence.
-        $this->base_path = is_dir($path) ? $path : pathinfo($path, PATHINFO_DIRNAME);
-
+        
         return $this;
 
     }
@@ -1205,3 +1305,4 @@ class Engine {
     }
 
 }
+

@@ -1,6 +1,8 @@
 <?php
 
+require_once __DIR__.'/../src/Olov.php';
 require_once __DIR__.'/../src/Olov/Engine.php';
+require_once __DIR__.'/../src/Olov/Encoder.php';
 
 class OlovEngineTest extends PHPUnit_Framework_TestCase {
 
@@ -9,14 +11,14 @@ class OlovEngineTest extends PHPUnit_Framework_TestCase {
      *
      * @var \Olov\Engine
      */
-    private $engine;
+    private $o;
 
     /**
      * test_vars
      *
      * @var mixed[]
      */
-    private $test_vars;
+    private $vars;
 
     public function setUp() 
     {
@@ -28,6 +30,7 @@ class OlovEngineTest extends PHPUnit_Framework_TestCase {
                     'php',
                     'olov', 
                     'esca>pe<=me', 
+                    'url.unsafe*&^', 
                     'template',
                     'html'
                 ], 
@@ -42,13 +45,20 @@ class OlovEngineTest extends PHPUnit_Framework_TestCase {
                 'links' => [
                     'Who? Me?', 
                     ['a:href'=>'http://unknown.com', 'li:class'=>'item'], 
-                    ['text'=>'Facebook', 'bro'=>'Facebook >>>', 'a:href'=>'http://facebook.com', 'li:class'=>'item'], 
-                    ['text'=>'Instagram', 'a:href'=>'http://instagram.com', 'li:class'=>'item'], 
+
+                    // Crazy input
+                    [
+                        'text'=>'Facebook', 
+                        'bro'=>'Facebook >>>', 
+                        'a:href'=>'http://facebook.com" onClick="alert(\'badness\')"', 
+                        'li:class'=>'item'
+                    ], 
+                    ['text'=>'Instagram', 'a:href'=>'http://instagram.com/u/gboyega?a=7', 'li:class'=>'item'], 
                     ['txt'=>'Twitter', 'a:href'=>'http://twitter.com', 'li:class'=>'item'], 
                     ['val'=>'LinkedIn', 'a:href'=>'http://linkedin.com', 'li:class'=>'item'], 
                     ['value'=>'Pinterest', 'a:href'=>'http://pinterest.com', 'li:class'=>'item'], 
                 ], 
-                'todos'=> [
+                'mycrushes'=> [
                     ['Grace Huang', 'input:type'=>'radio', 'input:name'=>'dev', 'input:value'=>'Grace Hunag'], 
                     ['Poppy Delevigne', 'input:type'=>'radio', 'input:name'=>'dev', 'input:value'=>'Poppy Delevigne'], 
                     ['Harley Viera-Newton', 'input:type'=>'radio', 'input:name'=>'dev', 'input:value'=>'Harley Viera-Newton']
@@ -57,7 +67,7 @@ class OlovEngineTest extends PHPUnit_Framework_TestCase {
             ]
         ];
 
-        $this->engine = new Olov\Engine(__DIR__.'/templates');
+        $this->o = Olov::o(__DIR__.'/templates');
         
     }
 
@@ -74,7 +84,7 @@ class OlovEngineTest extends PHPUnit_Framework_TestCase {
         $name = "page.user";
         $value = "Gboyega Dada";
 
-        $result = $this->engine
+        $result = $this->o
             ->setVar($name, $value)
             ->getVar($name);
 
@@ -93,7 +103,7 @@ class OlovEngineTest extends PHPUnit_Framework_TestCase {
      */
     public function test__engineInstanceCanBeInvokedAndSyntaxCheck($query, $expected)
     {
-        $result = $this->engine
+        $result = $this->o
             ->setVars($this->vars)
             ->__invoke($query);
 
@@ -114,7 +124,7 @@ class OlovEngineTest extends PHPUnit_Framework_TestCase {
      */
     public function test__invalidArgumentExceptionIsThrowWhenArgIsBad($query, $expected)
     {
-        $result = $this->engine
+        $result = $this->o
             ->setVars($this->vars)
             ->__invoke($query);
 
@@ -135,7 +145,7 @@ class OlovEngineTest extends PHPUnit_Framework_TestCase {
      */
     public function test__canRenderTemplateWithBaseTemplate()
     {
-        $output = $this->engine->render('b.html.php', $this->vars);
+        $output = $this->o->render('b.html.php', $this->vars);
         $expected = "TemplateB:HeaderTemplateA:ContentOriginalFooter";
 
         $output = $this->strip($output); // Remove white space characters from output.
@@ -151,76 +161,101 @@ class OlovEngineTest extends PHPUnit_Framework_TestCase {
     public function queryProvider()
     {
         return [
-            // 0: Expect false if variable is not set
+            // : Expect false if variable is not set
             ["?page.author", false], 
 
-            // 1: Expect true if variable is set
+            // : Expect true if variable is set
             ["?page.title", true], 
 
-            // 2: Expect variable content
+            // : Expect variable content
             ["page.title", "Welcome to Olov!"], 
 
-            // 3: Expect true if variable's content length < 50 
+            // : Expect true if variable's content length < 50 
             ["page.title|less:50", true], 
 
-            // 4: Expect false if variable's content length is not < 10 
+            // : Expect false if variable's content length is not < 10 
             ["page.title|less:10", false], 
 
-            // 5: Expect true if variable's content length > 10 
+            // : Expect true if variable's content length > 10 
             ["page.title|more:10", true], 
 
-            // 6: Expect false if variable's content length not > 100 
+            // : Expect false if variable's content length not > 100 
             ["page.title|more:100", false], 
 
-            // 7: Expect string content length 
+            // : Expect string content length 
             ["page.title|length", 16], 
 
-            // 7: Expect array content length 
+            // : Expect array content length 
             ["page.links|length", 7],
 
-            // 8: Expect escaped variable content
+            // : Expect escaped variable content
             ["page.body", "Olov is a micro template &lt;b&gt;engine&lt;/b&gt; for PHP."],
 
-            // 9: Expect raw variable content
+            // : Expect raw variable content
             ["page.body*", "Olov is a micro template <b>engine</b> for PHP."], 
 
-            // 10: Expect escaped variable content (* turns it off, esc turns it back on -- zero sum)
+            // : Expect escaped variable content (* turns it off, esc turns it back on -- zero sum)
             ["page.body|esc*", "Olov is a micro template &lt;b&gt;engine&lt;/b&gt; for PHP."],
 
-            // 11: Expect escaped array variable values
-            ["page.tags", ['php','olov', 'esca&gt;pe&lt;=me', 'template', 'html']],
+            // : Expect html escaped array variable values
+            ["page.tags", ['php','olov', 'esca&gt;pe&lt;=me', 'url.unsafe*&amp;^', 'template', 'html']],
 
-            // 12: Expect raw array variable values
-            ["page.tags*", ['php','olov', 'esca>pe<=me', 'template', 'html']],
+            // : Expect url escaped array variable values
+            [
+                "page.tags|esc: url", 
+                ['php','olov', 'esca%3Epe%3C%3Dme', 'url.unsafe%2A%26%5E', 'template', 'html']
+            ],
 
-            // 13: Expect Olov to echo array content with each entry wrapped in <li>
-            ["page.tags|each", array_reduce(
-                ['php', 'olov', 'esca>pe<=me', 'template', 'html'],
-                function ($str, $v) {
-                    $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
-                    return "$str<li>$v</li>\n";
-                }, "")
+            // : Expect js+html escaped array variable values
+            [
+                "page.tags|esc: css", 
+                [
+                    'php','olov', 'esca\3E pe\3C \3D me', 
+                    'url\2E unsafe\2A \26 \5E ', 
+                    'template', 'html'
+                ]
+            ],
+
+            // : Expect raw array variable values
+            ["page.tags*", ['php','olov', 'esca>pe<=me', 'url.unsafe*&^', 'template', 'html']],
+
+            // : Expect Olov to echo array content with each entry wrapped in <li>
+            [
+                "page.tags|each", 
+
+                "<li>php</li>\n" . 
+                "<li>olov</li>\n" . 
+                "<li>esca&gt;pe&lt;=me</li>\n" . 
+                "<li>url.unsafe*&amp;^</li>\n" . 
+                "<li>template</li>\n" . 
+                "<li>html</li>\n" 
             ], 
 
-            // 14: Expect Olov to echo array content with each entry wrapped in <div>
-            ["page.tags|each:div", array_reduce(
-                ['php', 'olov', 'esca>pe<=me', 'template', 'html'],
-                function ($str, $v) {
-                    $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
-                    return "$str<div>$v</div>\n";
-                }, "")
+            // : Expect Olov to echo array content with each entry wrapped in <div>
+            [
+                "page.tags|each:div", 
+
+                "<div>php</div>\n" . 
+                "<div>olov</div>\n" . 
+                "<div>esca&gt;pe&lt;=me</div>\n" . 
+                "<div>url.unsafe*&amp;^</div>\n" . 
+                "<div>template</div>\n" . 
+                "<div>html</div>\n" 
             ] , 
 
-            // 15: Expect Olov to echo array content with each entry wrapped in <li><a><b> --- </b></a></li>
-            ["page.tags|each:b,a,li", array_reduce(
-                ['php', 'olov', 'esca>pe<=me', 'template', 'html'],
-                function ($str, $v) {
-                    $v = htmlspecialchars($v, ENT_COMPAT, 'UTF-8');
-                    return "$str<li><a><b>$v</b></a></li>\n";
-                }, "")
+            // : Expect Olov to echo array content with each entry wrapped in <li><a><b> --- </b></a></li>
+            [
+                "page.tags|each:b,a,li", 
+
+                "<li><a><b>php</b></a></li>\n" . 
+                "<li><a><b>olov</b></a></li>\n" . 
+                "<li><a><b>esca&gt;pe&lt;=me</b></a></li>\n" . 
+                "<li><a><b>url.unsafe*&amp;^</b></a></li>\n" . 
+                "<li><a><b>template</b></a></li>\n" . 
+                "<li><a><b>html</b></a></li>\n" 
             ], 
 
-            // 16: Expect Olov to echo array content with each entry wrapped in <li><a><b> --- </b></a></li>
+            // : Expect Olov to echo array content with each entry wrapped in <li><a><b> --- </b></a></li>
             //     and handle invalid entries like objects by printing their type instead ("object").
             ["page.mixed|each:b,a,li", array_reduce(
                 ['php', 'olov', 'esca>pe<=me', ['template', 'object'], ['object'], 'object'],
@@ -236,25 +271,27 @@ class OlovEngineTest extends PHPUnit_Framework_TestCase {
                 }, "")
             ], 
 
-            // 17: Expect Olov to echo array content with each entry wrapped in <li><a> --- </a></li>
+            // : Expect Olov to echo array content with each entry wrapped in <li><a> --- </a></li>
             //     with mapped tag properties rendered correctly.
+            // : Expect Olov to escape quotes in property values. 
             [
                 "page.links|each:a,li",
                 '<li><a>Who? Me?</a></li>' . "\n" .  
                 '<li class="item"><a href="http://unknown.com"></a></li>' . "\n" . 
-                '<li class="item"><a href="http://facebook.com">Facebook &gt;&gt;&gt;</a></li>' . "\n" . 
+                '<li class="item"><a href="http://facebook.com&quot;&#x20;onClick&#x3D;' . 
+                '&quot;alert&#x28;&#x27;badness&#x27;&#x29;&quot;">Facebook &gt;&gt;&gt;</a></li>' . "\n" . 
                 '<li class="item"><a href="http://instagram.com">Instagram</a></li>' . "\n" .  
                 '<li class="item"><a href="http://twitter.com">Twitter</a></li>' . "\n" . 
                 '<li class="item"><a href="http://linkedin.com">LinkedIn</a></li>' . "\n" .  
                 '<li class="item"><a href="http://pinterest.com">Pinterest</a></li>' . "\n"
             ], 
 
-            // 18: Expect Olov to handle self-closing tags (ex: <li><input> --- </li>)
+            // : Expect Olov to handle self-closing tags (ex: <li><input> --- </li>)
             [
-                "page.todos|each:input,li",
-                '<li><input type="radio" name="dev" value="Grace Hunag" />Grace Huang</li>' . "\n" . 
-                '<li><input type="radio" name="dev" value="Poppy Delevigne" />Poppy Delevigne</li>' . "\n" . 
-                '<li><input type="radio" name="dev" value="Harley Viera-Newton" />Harley Viera-Newton</li>' . "\n"   
+                "page.mycrushes|each:input,li",
+                '<li><input type="radio" name="dev" value="Grace&#x20;Hunag" />Grace Huang</li>' . "\n" . 
+                '<li><input type="radio" name="dev" value="Poppy&#x20;Delevigne" />Poppy Delevigne</li>' . "\n" . 
+                '<li><input type="radio" name="dev" value="Harley&#x20;Viera-Newton" />Harley Viera-Newton</li>' . "\n"   
             ]
         ];
 
