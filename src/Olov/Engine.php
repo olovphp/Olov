@@ -383,7 +383,12 @@ class Engine {
                         foreach ($v as $pk=>$pv) {
 
                             if (preg_match($pattern, (string)$pk, $_)) {
-                                $props[$_[1]][] = $_[2] . "=\"" . $this->encoder->esc_attr($pv) . "\"";
+                                $attr_name = $_[2];
+                                $attr_val = ($attr_name==='href' || $attr_name==='src') 
+                                   ? filter_var($pv, FILTER_VALIDATE_URL) 
+                                   : $this->encoder->esc_attr($pv) ;
+                                if ($attr_val === false) continue;
+                                $props[$_[1]][] = $attr_name . "=\"" . $attr_val . "\"";
                             } else {
                                 $text = $pv;
                             }
