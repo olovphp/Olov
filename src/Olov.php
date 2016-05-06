@@ -9,9 +9,6 @@
 
 use Olov\Engine;
 use Olov\Encoder;
-use RuntimeException;
-use BadMethodCallException;
-use InvalidArgumentException;
 
 /**
  * Olov PHP template engine.

@@ -278,9 +278,8 @@ class OlovEngineTest extends PHPUnit_Framework_TestCase {
                 "page.links|each:a,li",
                 '<li><a>Who? Me?</a></li>' . "\n" .  
                 '<li class="item"><a href="http://unknown.com"></a></li>' . "\n" . 
-                '<li class="item"><a href="http://facebook.com&quot;&#x20;onClick&#x3D;' . 
-                '&quot;alert&#x28;&#x27;badness&#x27;&#x29;&quot;">Facebook &gt;&gt;&gt;</a></li>' . "\n" . 
-                '<li class="item"><a href="http://instagram.com">Instagram</a></li>' . "\n" .  
+                '<li class="item"><a>Facebook &gt;&gt;&gt;</a></li>' . "\n" . 
+                '<li class="item"><a href="http://instagram.com/u/gboyega?a=7">Instagram</a></li>' . "\n" .  
                 '<li class="item"><a href="http://twitter.com">Twitter</a></li>' . "\n" . 
                 '<li class="item"><a href="http://linkedin.com">LinkedIn</a></li>' . "\n" .  
                 '<li class="item"><a href="http://pinterest.com">Pinterest</a></li>' . "\n"
