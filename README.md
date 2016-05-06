@@ -213,7 +213,7 @@ $vars = [
 Then...
 ```php
 <ul class="hollywood-actors">
-<?php o('page.tags|each:a,li'); ?>
+<?php o('page.users|each:a,li'); ?>
 </ul>
 ```
 Throw in the blender and ...

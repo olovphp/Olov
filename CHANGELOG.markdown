@@ -2,7 +2,11 @@
 All notable (and not so notable) changes to this project from this day (Thu May 5th, 2016)  
 will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.1.0] - 2016-05-05
+## [Unreleased]
+### Added
+- More filters: `title`, `upper`, `lower`, `round`, `num_format`, `join`, `default`, `keys`, `reverse`, `sort`
+
+## [1.1.0] - 2016-05-05
 ### Added
 - Support for multiple template folder paths added.
 - `Olov\Engine::addPath()` method added.
