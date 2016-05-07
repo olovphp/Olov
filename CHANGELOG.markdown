@@ -25,3 +25,10 @@ now set one folder path (as string) or multiple folder paths with an array argum
 *NOTE: `Olov\Engine::setPath()` always resets the engine's base paths (out with the old, in with new).*
 
 
+## [1.1.1] - 2016-05-07
+### Bug Fix
+- Fixed bug that was causing Olov to escape non-alphanum chars in href & src attribs. Olov now uses 
+`filter_var` with the `FILTER_VALIDATE_URL` flag. If an `href|src` attribute value  is invalid, it will not be set.
+
+
+

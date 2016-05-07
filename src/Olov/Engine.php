@@ -1,10 +1,24 @@
 <?php
 /**
- * Olov PHP Template Engine (http://olovphp.github.io/Olov)
+ * This file is a part of Olov.
  *
  * @link      http://olovphp.github.io/Olov
  * @copyright Copyright (c) 2016 Gboyega Dada
- * @license   https://github.com/olovphp/Olov/blob/master/gpl-3.0.txt (GPLv3 License)
+ * @license   https://github.com/olovphp/Olov/blob/1.x/LICENSE.txt (GPLv3 License)
+ *
+ * Olov is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Olov is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Olov.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
 
 namespace Olov;
@@ -19,8 +33,8 @@ use Closure;
 /**
  * Olov PHP template engine.
  *
- * @author Gboyega Dada <gboyega@fpplabs.com>
- * @version 0.1.0
+ * @author Gboyega Dada <boyega@gmail.com>
+ * @version 1.x
  */
 class Engine {
 
