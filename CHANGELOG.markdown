@@ -28,7 +28,7 @@ now set one folder path (as string) or multiple folder paths with an array argum
 ## [1.1.1] - 2016-05-07
 ### Bug Fix
 - Fixed bug that was causing Olov to escape non-alphanum chars in href & src attribs. Olov now uses 
-`filter_var` with the `FILTER_VALIDATE_URL` flag. If an `href|src` attribute value  is invalid, it will not be set.
+`filter_var` with the `FILTER_VALIDATE_URL` flag. If an `href|src` attribute value  is invalid, it will not be set. Ok.
 
 
 
